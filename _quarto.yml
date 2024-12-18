@@ -4,9 +4,12 @@ project:
   render: 
     - absence.qmd
     - about.qmd
-    - index.qmd
 
 website:
+  title: "Brighton and Hove Secondary Schools Consultation Evidence"
+  navbar:
+    background: primary
+    search: true
   sidebar:
     style: "docked"
     search: true
@@ -33,7 +36,7 @@ website:
 
 format:
   html:
-    theme: minty
+    theme: journal
     css: styles.css
     toc: true
     code-fold: true
