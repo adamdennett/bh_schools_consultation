@@ -1,19 +1,43 @@
 project:
   type: website
+  output-dir: docs
+  render: 
+    - absence.qmd
+    - about.qmd
+    - index.qmd
 
 website:
-  title: "BH_Schools_Consultation"
-  navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - text: "Introduction"
+        href: about.qmd
+      - section: "Absence"
+        href: absence.qmd
+        contents:
+          - index.qmd
+    tools:
+      - icon: person-circle
+        href: https://adamdennett.co.uk
+      - icon: twitter
+        href: https://twitter.com/adam_dennett
+      - icon: github
+        menu:
+          - text: Source Code
+            url:  https://github.com/adamdennett/BH_Schools_2
+          - text: Report a Bug
+            url:  https://github.com/adamdennett/BH_Schools_2/issues
+  repo-url: https://github.com/adamdennett/BH_Schools_2
+  repo-actions: [source, issue]
 
 format:
   html:
-    theme: cosmo
+    theme: minty
     css: styles.css
     toc: true
+    code-fold: true
+    code-tools: true
 
 editor: visual
 
