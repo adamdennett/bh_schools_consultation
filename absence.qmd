@@ -705,28 +705,32 @@ Observations - @fig-plot6
 #   labs(title = "Distribution of P8MEA",
 #        x = "P8MEA",
 #        y = "Count") +
-#   theme_minimal()
+#    theme_minimal()
 
 # median_value <- median(england_school_2022_23_not_special$ATT8SCR, na.rm = TRUE)
-# 
-# 
-# btn_sub <- btn_sub %>%
-#   mutate(SCHNAME.x = factor(SCHNAME.x, levels = SCHNAME.x[order(ATT8SCR, decreasing = T)]))
-# 
-# ggplot(england_school_2022_23_not_special, aes(x = ATT8SCR)) +
-#   geom_histogram(binwidth = 1, fill = "grey", alpha = 0.4) +  # New color for the bars with added transparency
-#   geom_vline(xintercept = median_value, color = "black", linetype = "dotted", size = 1) +
-#   labs(title = "Attainment 8 Measure Across the Full 2022/23 Academic Year - \n(All Secondary Schools England, Brighton overlaid)",
-#        x = "Attainment 8 Measure",
-#        y = "Count",
-#        color = "School (ordered lowest Attainment8)") +  # Change legend title to "School"
-#   theme_minimal() +
-#   geom_vline(data = btn_sub, aes(xintercept = ATT8SCR, color = SCHNAME.x), linetype = "solid", linewidth = 1) +  # Solid vertical lines colored by SCHNAME.x
-#   scale_color_manual(values = brewer.pal(10, "Set3")) +  # Use Set3 palette for high contrast with 10 colors
-#   theme(legend.position = "bottom", 
-#         legend.title = element_blank(),
-#         legend.background = element_rect(fill = "white", size = 0.2, linetype = "solid", color = "black")) + guides(col = guide_legend(nrow = 4))
+#
+#
+median_value <- median(england_school_2022_23_not_special$ATT8SCR, na.rm = TRUE)
 
+
+btn_sub <- btn_sub %>%
+  mutate(SCHNAME.x = factor(SCHNAME.x, levels = SCHNAME.x[order(ATT8SCR, decreasing = T)]))
+
+#btn_sub[,c("SCHNAME.x","P8MEA")]
+
+ggplot(england_school_2022_23_not_special, aes(x = ATT8SCR)) +
+  geom_histogram(binwidth = 1, fill = "grey", alpha = 0.4) +  # New color for the bars with added transparency
+  geom_vline(xintercept = median_value, color = "black", linetype = "dotted", size = 1) +
+  labs(title = "Attainment 8 Measure Across the Full 2022/23 Academic Year - \n(All Secondary Schools England, Brighton overlaid)",
+       x = "Attainment 8 Measure",
+       y = "Count",
+       color = "School (ordered highest Attainment8)") +  # Change legend title to "School"
+  theme_minimal() +
+  geom_vline(data = btn_sub, aes(xintercept = ATT8SCR, color = SCHNAME.x), linetype = "solid", linewidth = 1) +  # Solid vertical lines colored by SCHNAME.x
+  scale_color_manual(values = brewer.pal(10, "Set3")) +  # Use Set3 palette for high contrast with 10 colors
+  theme(legend.position = "bottom", 
+        legend.title = element_blank(),
+        legend.background = element_rect(fill = "white", size = 0.2, linetype = "solid", color = "black")) + guides(col = guide_legend(nrow = 4))
 ```
 
 ## Absence, Disadvantage and Attainment
@@ -799,6 +803,32 @@ ggplot(england_school_2022_23_not_special, aes(y = P8MEA, x = PPERSABS10)) +
 
     -   We know that, *on average*, reducing persistent absence in a school by 1% will likely increase their Progress 8 score by 0.04. 10% reduction in persistent absence will lead to a Progress 8 increasing by 0.4.
 
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot27
+#| fig-cap: "Attainment 8 vs Persistent Absence across all schools in England, 2022/23"
+
+# Base plot with england_school_2022_23
+
+lm_model <- lm(ATT8SCR ~ PPERSABS10, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+lm_coefficients <- lm_summary$coefficients
+intercept <- round(lm_coefficients[1, 1], 2)
+slope <- round(lm_coefficients[2, 1], 2)
+r_squared <- round(lm_summary$r.squared, 2)
+
+
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR, x = PPERSABS10)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +  # Add linear model line for england_school_2022_23
+  labs(title = "Attainment 8 vs Persistent Absence %, 2022-23",
+       x = "% Enrollments who are persistently absent",
+       y = "Attainment 8 measure",
+       color = "Ofsted Rating") +
+  theme_minimal() +
+  annotate("text", x = 100, y = Inf, label = paste("Intercept:", intercept, "\nSlope:", slope, "\nR²:", r_squared), hjust = 1.1, vjust = 2, size = 5, color = "black") +
+  xlim(0, 100)
+```
+
 #### Disadvantage and Attainment
 
 OK, now we're warmed up, here's a very similar scatter plot, but this time plotting the % of disadvantaged students at a school relative to Progress 8. You might notice some similarities and some differences and I will highlight the ones I think relevant below.
@@ -843,6 +873,35 @@ ggplot(england_school_2022_23_not_special, aes(y = P8MEA, x = PTFSM6CLA1A)) +
     -   Intercept - the intercept is 0.36, which means that, on average, if a school had 0% disadvantaged students, it might expect a Progress 8 score of 0.36. This is compared to an intercept of 1.06 for Persistent absence, again, suggesting reducing absence rather than disadvantage concentrations is likely to have a greater impact on Progress 8.
 
     -   $R^2$ - this is 0.15. So the % of disadvantaged students in a school can only predict 15% of the variation in Progress 8 scores (compared to 47% for Persistent Absence). It is also possible to see this visually - the cloud of points in this plot are far more dispersed than in the earlier plot, showing visually the weaker relationship.
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot28
+#| fig-cap: "Attainment 8 vs % Disadvantaged across all schools in England, 2022/23"
+
+# Base plot with england_school_2022_23
+
+lm_model <- lm(ATT8SCR ~ PTFSM6CLA1A, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+lm_coefficients <- lm_summary$coefficients
+intercept <- round(lm_coefficients[1, 1], 2)
+slope <- round(lm_coefficients[2, 1], 2)
+r_squared <- round(lm_summary$r.squared, 2)
+
+
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +  # Add linear model line for england_school_2022_23
+  geom_smooth(method = "lm", formula=(y ~ exp(-0.09*x)), se = TRUE, colour = "red") + geom_smooth(method = "loess", formula=(y ~ x), se = TRUE, colour = "green") + 
+  labs(title = "Attainment 8 vs % Percentage of Disadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure",
+       color = "Ofsted Rating") +
+  theme_minimal() +
+  annotate("text", x = 100, y = Inf, label = paste("Intercept:", intercept, "\nSlope:", slope, "\nR²:", r_squared), hjust = 1.1, vjust = 2, size = 5, color = "black") +
+  xlim(0, 100)
+```
+
+\*note need to figure out the function here - not linear
 
 ### Interpretation
 
@@ -950,6 +1009,67 @@ geom_point(data = btn_sub, aes(y = P8MEA, x = PPERSABS10, colour = OFSTEDRATING)
 
 ```
 
+Attainment 8
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot29
+#| fig-cap: "Attainment 8 vs Persistent Absence, by OfSted Rating, All Schools in England, 2022/23. Brighton Schools Overlaid."
+
+
+filtered_data <- eng_sch_2022_23_not_special_plus %>%
+  filter(OFSTEDRATING != "Inadequate" & !is.na(OFSTEDRATING))
+filtered_region <- eng_sch_2022_23_not_special_plus %>%
+  filter(OFSTEDRATING != "Inadequate" & !is.na(OFSTEDRATING) & !is.na(gor_name))
+btn_sub <- filtered_region %>%
+  filter(URN %in% btn_urn_list$urn)
+
+
+# Base plot with england_school_2022_23
+plot <- ggplot(filtered_data, aes(y = ATT8SCR, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add linear model line for england_school_2022_23
+  labs(title = "Attainment 8 vs Persistent Absence %, 2022-23",
+       x = "% Enrollments who are persistently absent",
+       y = "Attainment 8 measure after adjustment for extreme scores",
+       color = "Ofsted Rating") +
+  theme_minimal()
+
+# Add another layer with btn_sub points and labels with sticks
+plot + 
+  geom_point(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10), color = "black") +
+  geom_smooth(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10), method = "lm", se = FALSE, color = "black") +  # Add linear model line for btn_sub
+  geom_text_repel(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10, label = SCHNAME.x), color = "black", size = 3, nudge_y = c(-1.5, 1.5), force = 10, box.padding = 0.5, max.overlaps = 10, direction = "both") 
+
+#ggsave(here("images","progress8_vs_persabs.png"), width = 10, height = 6, dpi = 300)
+```
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot30
+#| fig-cap: "Attainment 8 vs Persistent Absence, by OfSted Rating, All Schools in England, 2022/23."
+ggplot(filtered_data, aes(y = ATT8SCR, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add linear model line for england_school_2022_23
+  labs(title = "Attainment 8 vs Persistent Absence %, 2022-23",
+       x = "% Enrollments who are persistently absent",
+       y = "Attainment 8 measure after adjustment for extreme scores",
+       color = "Ofsted Rating") +
+  theme_minimal() +
+  facet_wrap(~ OFSTEDRATING)  # Facet plots for each Ofsted rating
+```
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot31
+#| fig-cap: "Attainment 8 vs Persistent Absence, by OfSted Rating, Brighton and Hove Schools Only"
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR, x = PPERSABS10, colour = OFSTEDRATING)) +
+geom_point(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_smooth(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10), method = "lm", se = TRUE, color = "black") +  # Add linear model line for btn_sub
+  geom_text_repel(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10, label = SCHNAME.x), color = "black", size = 3, nudge_y = c(-1.5, 1.5), force = 10, box.padding = 0.5, max.overlaps = 10, direction = "both") +  # Add linear model line for england_school_2022_23
+  labs(title = "Attainment 8 vs Persistent Absence %, 2022-23",
+       x = "% Enrollments who are persistently absent",
+       y = "Attainment 8 measure after adjustment for extreme scores") +
+  theme_minimal()
+```
+
 ### Regional Effects - Persistent Absence
 
 For comparison, we can try other data groupings to see if these make reveal anything else within the data. Below in @fig-plot12 and @fig-plot13 the data are grouped according to region. I have done this as we already know from work in previous weeks, that London is an outlier educationally (generally achieving better attainment scores than the rest of the country and doing better by its most disadvantaged pupils).
@@ -1003,6 +1123,26 @@ ggplot(filtered_region, aes(y = P8MEA, x = PPERSABS10, colour = gor_name)) +
     -   Having a look a what schools are impacting the line - <https://www.desmos.com/calculator/oost57whub> - it's possible to observe that the shallowness of the line relative to English regions is a function of the small number of points and BACA performing better than would be expected given the very high number of persistent absentees in the school. Dropping BACA's Progress 8 from -0.5 to something like -0.65 would bring the line down to something like the regional slopes.
 
     -   Conversely, BACA's 2023/24 improvement (although we don't know the corresponding persistent absence) is likely to make the slope even shallower. So this is not that improving persistent absence in the city would have less impact than it would elsewhere in the country, rather BACA despite a headline 'below average' Progress 8 score, is actually doing much better than we would expect given the levels of persistent absence and this is pulling the slope upwards for the city.
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot32
+#| fig-cap: "Attainment 8 vs Persistent Absence, by Region, All Schools in England, 2022/23. Brighton Schools Overlaid."
+# Base plot with england_school_2022_23
+plot <- ggplot(filtered_region, aes(y = ATT8SCR, x = PPERSABS10, colour = gor_name)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add linear model line for england_school_2022_23
+  labs(title = "Attainment 8 vs Persistent Absence %, 2022-23",
+       x = "% Enrollments who are persistently absent",
+       y = "Progress 8 measure after adjustment for extreme scores",
+       color = "Region") +
+  theme_minimal()
+
+# Add another layer with btn_sub points and labels with sticks
+plot + 
+  geom_point(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10), color = "black") +
+  geom_smooth(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10), method = "lm", se = FALSE, color = "black") +  # Add linear model line for btn_sub
+  geom_text_repel(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10, label = SCHNAME.x), color = "black", size = 3, nudge_y = c(-1.5, 1.5), force = 10, box.padding = 0.5, max.overlaps = 10, direction = "both") 
+```
 
 ### Ofsted and Disadvantage
 
@@ -1076,6 +1216,59 @@ geom_point(data = btn_sub, aes(y = P8MEA, x = PTFSM6CLA1A, colour = OFSTEDRATING
     -   the distribution of the points means the line is not a very reliable summary (it's a poor model for Brighton and likely statistically insignificant after controlling for levels of absence - we will come to this later.)
 
     -   but looking at Kings, Stringer and Varndean, rather than schools with more disadvantaged students doing worse than expected, it is back to [the point I made on advantaged and disadvantaged attainment in the city here](https://adamdennett.github.io/BH_Schools_2/factsheet.html#fact-1---disadvantaged-attainment) - that Brighton and Hove is doing particularly well for its non-disadvantaged students and these schools are helping pull the line up at the top.
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot34
+#| fig-cap: "Attainment 8 vs % Disadvantaged, by OfSted Rating, All Schools in England, 2022/23. Brighton Schools Overlaid."
+
+#colour = "#b3cde3"
+
+plot <- ggplot(filtered_data, aes(y = ATT8SCR, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add linear model line for england_school_2022_23
+  labs(title = "Attainment 8 vs Disadvantaged Student %, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure after adjustment for extreme scores") +
+  theme_minimal()
+
+# Add another layer with btn_sub points and labels with sticks
+plot + 
+  geom_point(data = btn_sub, aes(y = ATT8SCR, x = PTFSM6CLA1A), color = "black") +
+  geom_smooth(data = btn_sub, aes(y = ATT8SCR, x = PTFSM6CLA1A), method = "lm", se = FALSE, color = "black") +  # Add linear model line for btn_sub
+  geom_text_repel(data = btn_sub, aes(y = ATT8SCR, x = PTFSM6CLA1A, label = SCHNAME.x), color = "black", size = 3, nudge_y = c(-1.5, 1.5), force = 10, box.padding = 0.5, max.overlaps = 10, direction = "both")
+
+#ggsave(here("images","progress8_vs_disadvantage.png"), width = 10, height = 6, dpi = 300)
+```
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot35
+#| fig-cap: "Attainment 8 vs % Disadvantaged, by OfSted Rating, All Schools in England, 2022/23."
+
+ggplot(filtered_data, aes(y = ATT8SCR, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Add linear model line for filtered_data
+  labs(title = "Attainment 8 vs Disadvantaged Student %, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure") +
+  theme_minimal() +
+  facet_wrap(~ OFSTEDRATING)  # Facet plots for each Ofsted rating
+```
+
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot38
+#| fig-cap: "Attainment 8 vs % Disadvantaged, by OfSted Rating, Brighton and Hove Schools Only"
+ggplot(filtered_data) +
+geom_point(data = btn_sub, aes(y = ATT8SCR, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_smooth(data = btn_sub, aes(y = ATT8SCR, x = PTFSM6CLA1A), method = "lm", se = TRUE, color = "black") +  # Add linear model line for btn_sub
+  geom_text_repel(data = btn_sub, aes(y = ATT8SCR, x = PTFSM6CLA1A, label = SCHNAME.x), color = "black", size = 3, nudge_y = c(-1.5, 1.5), force = 10, box.padding = 0.5, max.overlaps = 10, direction = "both") +  # Add linear model line for england_school_2022_23
+  labs(title = "Attainment 8 vs % Disadvantaged, 2022-23",
+       x = "% Disadvantaged",
+       y = "Attainment 8 measure") +
+  theme_minimal()
+
+#export <- btn_sub[,c("P8MEA", "PTFSM6CLA1A")]
+
+```
 
 #### Interpretation
 
