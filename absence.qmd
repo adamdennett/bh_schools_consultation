@@ -33,6 +33,10 @@ library(tidytransit)
 
 ```
 
+# Executive Summary
+
+\*To complete still
+
 ## Absence/Attendance and Attainment?
 
 In this piece I am going to change the focus of the conversation and look at something which has thus far been absent (excuse the pun) from any of the conversations about the school system in Brighton. The issue of absence/attendance and its importance for educational outcomes.
@@ -59,13 +63,13 @@ The underpinning assumptions in those statements above and the proposals that fo
 
 But in much the same way as when we go to the doctor, we expect an accurate diagnosis and corresponding efficacious treatment, we all know that unfortunately, sometimes, neither diagnosis nor treatment are correct.
 
-We know the council's prescribed treatment has been influenced quite heavily by some of the work of Stephen Gorard (<https://theconversation.com/poorer-pupils-do-worse-at-school-heres-how-to-reduce-the-attainment-gap-205535>), but before rushing to a Gorardian treatment, do we know that the diagnosis for the city even correct? And before prescribing a treatment, should we have not carried out a thorough examination of the patient first in case a more serious underlying ailment is causing the symptoms? This is all before we get anywhere near the negative side effects
+We know the council's prescribed treatment has been influenced quite heavily by some of the work of Stephen Gorard (<https://theconversation.com/poorer-pupils-do-worse-at-school-heres-how-to-reduce-the-attainment-gap-205535>), but before rushing to a Gorardian treatment, do we know that the diagnosis for the city is even correct? Before prescribing a treatment, should we have not carried out a thorough examination of the patient first in case a more serious underlying ailment is causing the symptoms? This is all before we get anywhere near the negative side effects.
 
 Not wanting to strain the metaphor further, how do we know for sure that a lack of mixing is indeed the main factor holding back disadvantaged attainment? What if it is not? And if it is not, what is more important? And if there are more important factors, might there be more effective routes to minimising disadvantaged educational outcomes that could offer better or faster results, and indeed do so without the levels of disruption currently on the table?
 
-These are very important questions to ask, not least because under the current proposals, one of the experimental 'treatments' being prescribed by the council is forced mixing in schools through artificially reducing places in schools for local students and '[busing](https://en.wikipedia.org/wiki/Desegregation_busing)' significant numbers of students from some neighbourhoods (some by 'choice' and some through 'displacement' [- see the PGS explainer here](https://www.parentsupport.group/wp-content/uploads/2024/12/schools_admissions_2026_explainer_v1.0_2024-12-4-final.pdf)) to schools a long way from their homes. This kind of forced mixing not only has a questionable history and efficacy in other contexts (see [@rossell1990] and others for the US history - a very different context, but same underlying idea), but has huge negative social/community, financial and environmental implications for our city (many of which were [raised in the Parent Support Group's latest deputation at the Labour Cabinet meeting in November](https://www.parentsupport.group/deputation-to-brighton-council-cabinet-5th-dec-2024/)) which have thus-far been ignored by those advocating for the proposals.
+These are very important questions to ask, not least because under the current proposals, one of the experimental 'treatments' being prescribed by the council is forced mixing in schools through artificially reducing places in schools for local students and busing (or more likely privately driving) significant numbers of students from some neighbourhoods (some by 'choice' and some through 'displacement' [- see the PGS explainer here](https://www.parentsupport.group/wp-content/uploads/2024/12/schools_admissions_2026_explainer_v1.0_2024-12-4-final.pdf)) to schools a long way from their homes. This kind of forced mixing not only has a questionable history but has huge negative social/community, financial and environmental implications for our city (many of which were [raised in the Parent Support Group's latest deputation at the Labour Cabinet meeting in November](https://www.parentsupport.group/deputation-to-brighton-council-cabinet-5th-dec-2024/)) which have thus-far been ignored by those advocating for the proposals.
 
-And as I will show below, it is the case that the treatment currently being prescribed by the council, might even make things much worse - again, at risk of stretching the metaphor too far, this could be akin 19th Century doctors prescribing arsenic for psoriasis [@sarfraz2023] - it sort of works in some ways, but OH GOD WHAT HAVE YOU DONE?
+And as I will show below, the treatment currently being prescribed by the council, worse than being ineffective, is likely worsen attainment across the city - again, at risk of stretching the metaphor too far, this could be akin 19th Century doctors prescribing arsenic for psoriasis [@sarfraz2023] - it sort of works in some ways, but OH GOD WHAT HAVE YOU DONE?
 
 ### Is there anything more important than social mixing holding back educational attainment, particularly for disadvantaged pupils?
 
@@ -150,7 +154,7 @@ The Department for Education (DfE) publishes various datasets online which cover
 
 ### Persistent Absence - The National Picture
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #unauthorised absence
 
 #https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/be024b4d-4f91-40e4-8a58-50dc53dcc93f
@@ -269,7 +273,7 @@ medians <- absence_secondary %>%
 #                                                    size = c(1, 1))))
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot
 #| fig-cap: "Persistent Absence in State Secondary Schools, 2016/17 to 2023/24; All Local Authorities in England. Brighton and Hove and England Overlaid."
 medians <- absence_secondary %>%
@@ -302,7 +306,7 @@ There are couple of things worth pointing out in @fig-plot above:
 
 -   For Brighton and Hove this situation is bad. Persistent absence has been above average since 2016/17 and while it had declined to only just above the national average in 2020/21, since the Pandemic, the rates of persistent absence have been well above the national average, in 2023/24 topping out at 28%, 4% above the national average of 24%.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot2
 #| fig-cap: "Persistent Absence in State Secondary Schools, All Local Authorities in England 2023/24. Brighton and Hove, Mean, Interquartile Range and Outliers at 90% and 95% added."
 
@@ -399,7 +403,7 @@ ggplot(absence_2023, aes(x = enrolments_pa_10_exact_percent, fill = deviation_st
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot3
 #| fig-cap: "Persistent Absence Over Time, Compared to Regions in England"
 
@@ -436,7 +440,7 @@ ggplot() +
 
 So what does persistent absence look like at the school-level in Brighton? Are all schools contributing to the city performing so badly on persistent absence or are there areas where absence is particularly bad? The histogram in @fig-plot4 below plots the rates of persistent absence for all state secondary schools in England in 2022/23 and overlays the rates the different schools for Brighton and Hove. The black dotted line is the median for England.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 
 ##Absence 2022-23 regression analysis
 
@@ -516,7 +520,7 @@ eng_sch_2022_23_not_special_plus <- england_school_2022_23_not_special %>% left_
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot4
 #| fig-cap: "Percentage of Enrolments who are persistently absence (over 10% sessions missed), England (Brighton and Hove Schools overlaid)."
 median_value <- median(england_school_2022_23_not_special$PPERSABS10, na.rm = TRUE)
@@ -544,7 +548,7 @@ ggplot(england_school_2022_23_not_special, aes(x = PPERSABS10)) +
 
 ```
 
-#### Observations
+#### Observations - @fig-plot4
 
 -   Schools are ordered from lowest to highest left-to-right, so congested lines in the middle can be read from the legend in order.
 
@@ -564,7 +568,7 @@ While we are here, it will be useful to look at the disadvantaged pupil picture 
 
 Taking the description from the DfE "Pupils are defined as disadvantaged if they are known to have been eligible for free school meals at any point in the past six years (from year 6 to year 11), if they are recorded as having been looked after for at least one day or if they are recorded as having been adopted from care."
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot5
 #| fig-cap: "Percentage of Pupils Disadvantaged at the end of KS4, England (Brighton and Hove Schools overlaid)."
 #https://explore-education-statistics.service.gov.uk/find-statistics/key-stage-4-performance/2022-23
@@ -606,7 +610,7 @@ ggplot(england_school_2022_23_not_special, aes(x = PTFSM6CLA1A)) +
 
 ```
 
-Observations - @fig-plot5
+#### Observations - @fig-plot5
 
 -   The national median for disadvantaged pupils at the end of KS4 is around 24%. Most schools in Brighton have below the national average rates of disadvantage.
 -   PACA (26%) and Longhill (29%) have slightly above the national average rate of disadvantage, but not significantly so.
@@ -651,7 +655,7 @@ Progress 8 has been criticised as a measure for various reasons, including its p
 
 So we will continue with Progress 8 for now.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot6
 #| fig-cap: "Progress 8 across all schools in England, 2022/23 with Brighton and Hove schools overlaid."
 
@@ -739,7 +743,7 @@ To begin with, I will start with a simple scatter plot. We probably all drew the
 
 The plot below in @fig-plot7 is a scatter plot, with each point representing a school in England. The y-axis (vertical) has the average Progress 8 score at the end of KS4 for that school in 2022/23. In this plot, the x-axis (horizontal) represents the % of enrollments at that school that are persistently absent (over 10% of sessions missed) in the same year.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot7
 #| fig-cap: "Progress 8 vs Persistent Absence across all schools in England, 2022/23"
 
@@ -769,7 +773,7 @@ ggplot(england_school_2022_23_not_special, aes(y = P8MEA, x = PPERSABS10)) +
 #ggsave(here("images","progress8_vs_persabs.png"), width = 10, height = 6, dpi = 300)
 ```
 
-Observations - @fig-plot7
+#### Observations - @fig-plot7
 
 -   Looking at the plot and all points together, it should hopefully be clear that on the whole, as the % of enrollments who are persistently absent increases, the value of the Progress 8 score decreases. The more a school has high levels of persistent absence, the lower its Progress 8 score is likely to be. There are, of course, a few weird values (outliers) which don't follow this trend, but most do.
 
@@ -779,15 +783,15 @@ Observations - @fig-plot7
 
     -   The first is known as the 'intercept'. This is the value on the y-axis of the blue line as it crosses zero. In our example, it can be thought of as the value of Progress 8 we would expect for a school if it had 0% persistent absence. Our average best-case Progress 8, if you like. In our case, this value would be 1.06.
 
-    -   The second is known as the 'slope'. This is the change in the value of y (Progress 8) for a one-unit change (1% persistent absence) on the x-axis. In our example, the slope is -0.04. This means that for every additional 1% of students that are persistently absent, on average, the Progress 8 score for that school will reduce by -0.04.
+    -   The second is known as the 'slope'. This is the change in the value of $y$ (Progress 8) for a one-unit change (1% persistent absence) on the $x$-axis. In our example, the slope is -0.04. This means that for every additional 1% of students that are persistently absent, on average, the Progress 8 score for that school will reduce by -0.04.
 
-    -   The other way of thinking about the slope is how much effect x (persistent absence) is having on y (Progress 8) - if there is there is a causal relationship (which I will return to below). The higher the value of the slope, the more effect x is having on y, the lower the value, the less effect it is having. It's worth also noting that the slope value is in units of x.
+    -   The other way of thinking about the slope is how much effect $x$ (persistent absence) is having on $y$ (Progress 8) - if there is there is a causal relationship (which I will return to below). The higher the value of the slope, the more effect $x$ is having on $y$, the lower the value, the less effect it is having. It's worth also noting that the slope value is in units of $x$.
 
 -   On the plot above, I have calculated one more useful property of the points which statisticians know as [the $R^2$.](https://en.wikipedia.org/wiki/Coefficient_of_determination) In lay terms, this is a number between 0-1 that describes how good a representation of the points the blue line is. The closer the points hug the line, the closer to 1 the value gets. If all of the black points fell exactly on the line, the [$R^2$](https://en.wikipedia.org/wiki/Coefficient_of_determination) = 1. Another way of describing the blue line is it's a model (a representation) of the black points. The closer to 1 our [$R^2$](https://en.wikipedia.org/wiki/Coefficient_of_determination) value is, the better our model is and the more reliable it is at describing the underlying relationship.
 
 -   Our blue line (model) has an [$R^2$](https://en.wikipedia.org/wiki/Coefficient_of_determination) = 0.47. Another way of thinking about this is to say that 47% of the variation in Progress 8 scores between schools can be explained just by the variation in persistent absence. So almost 50%. In statistical terms, this is a very good model. The relationship between Progress 8 and persistent absence is very strong.
 
--   One note of caution with interpreting relationships like this is often it is easy to confuse correlation (things going up or down together) with causation (x causing y, rather than y causing x). This is something all researchers need to be aware of and careful to identify clear theoretical reasons behind suggested relationships. However, in this particular case, the causal pathways are clear. As [@riordan2021b] (cited earlier) states: "*this correlation \[between absence and attainment\] is most likely to be causal. This is because there is an intuitive underlying causal mechanism: students not in school are less likely to learn the school curriculum."*
+-   One note of caution with interpreting relationships like this is often it is easy to confuse correlation (things going up or down together) with causation ($x$ causing $y$, rather than $y$ causing $x$). This is something all researchers need to be aware of and careful to identify clear theoretical reasons behind suggested relationships. However, in this particular case, the causal pathways are clear. As [@riordan2021b] (cited earlier) states: "*this correlation \[between absence and attainment\] is most likely to be causal. This is because there is an intuitive underlying causal mechanism: students not in school are less likely to learn the school curriculum."*
 
 -   So this simple plot actually contains a lot of information:
 
@@ -799,7 +803,7 @@ Observations - @fig-plot7
 
 OK, now we're warmed up, here's a very similar scatter plot, but this time plotting the % of disadvantaged students at a school relative to Progress 8. You might notice some similarities and some differences and I will highlight the ones I think relevant below.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot8
 #| fig-cap: "Progress 8 vs % Disadvantaged across all schools in England, 2022/23"
 
@@ -828,7 +832,7 @@ ggplot(england_school_2022_23_not_special, aes(y = P8MEA, x = PTFSM6CLA1A)) +
 #ggsave(here("images","progress8_vs_persabs.png"), width = 10, height = 6, dpi = 300)
 ```
 
-Observations - @fig-plot8
+#### Observations - @fig-plot8
 
 -   The first thing to note is there is also a negative correlation in this graph. As the proportion of disadvantaged students a school has goes up, on average, the progress 8 score goes down.
 
@@ -864,7 +868,7 @@ The plots above are informative, but we can actually make them work a little har
 
 ### The Ofsted Rating Effect - Persistent Absence
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot9
 #| fig-cap: "Progress 8 vs Persistent Absence, by OfSted Rating, All Schools in England, 2022/23. Brighton Schools Overlaid."
 
@@ -897,7 +901,7 @@ plot +
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot10
 #| fig-cap: "Progress 8 vs Persistent Absence, by OfSted Rating, All Schools in England, 2022/23."
 ggplot(filtered_data, aes(y = P8MEA, x = PPERSABS10, colour = OFSTEDRATING)) +
@@ -920,7 +924,7 @@ ggplot(filtered_data, aes(y = P8MEA, x = PPERSABS10, colour = OFSTEDRATING)) +
 
     -   The slopes also become less steep as you get towards Outstanding. This means that for outstanding schools, even though persistent absence still affects their P8 scores negatively, the effect is less severe than for good, requires improvement or special measures schools, where the effect is sucessively more amplifed.
 
--   For Brighton (see @fig-plot11 below for a zoomed in view), most of the schools in the city are rated good in 2022/23 (except for Longhill and BACA which are 'requires improvement').
+-   For Brighton (see @fig-plot11 below for a zoomed in view - or [here](https://www.desmos.com/calculator/oost57whub) for an interactive version), most of the schools in the city are rated good in 2022/23 (except for Longhill and BACA which are 'requires improvement').
 
     -   The relationship between persistent absence and attainment, on average, appears no different in Brighton than it does in the rest of the country. It's slope and intercept are similar to the 'good schools' slope for the rest of the country.
 
@@ -932,7 +936,7 @@ ggplot(filtered_data, aes(y = P8MEA, x = PPERSABS10, colour = OFSTEDRATING)) +
 
         -   The opposite is true for Longhill and Patcham - relative to their persistent absence rates, these schools are doing worse than we would expect - they are below the black regression line. Both would still certainly improve if they cut their persistent absence rates, but it is clear that there are other things also going on. More so than in other schools.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot11
 #| fig-cap: "Progress 8 vs Persistent Absence, by OfSted Rating, Brighton and Hove Schools Only"
 ggplot(england_school_2022_23_not_special, aes(y = P8MEA, x = PPERSABS10, colour = OFSTEDRATING)) +
@@ -950,7 +954,7 @@ geom_point(data = btn_sub, aes(y = P8MEA, x = PPERSABS10, colour = OFSTEDRATING)
 
 For comparison, we can try other data groupings to see if these make reveal anything else within the data. Below in @fig-plot12 and @fig-plot13 the data are grouped according to region. I have done this as we already know from work in previous weeks, that London is an outlier educationally (generally achieving better attainment scores than the rest of the country and doing better by its most disadvantaged pupils).
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot12
 #| fig-cap: "Progress 8 vs Persistent Absence, by Region, All Schools in England, 2022/23. Brighton Schools Overlaid."
 # Base plot with england_school_2022_23
@@ -973,7 +977,7 @@ plot +
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot13
 #| fig-cap: "Progress 8 vs Persistent Absence, by Region, All Schools in England, 2022/23. "
 ggplot(filtered_region, aes(y = P8MEA, x = PPERSABS10, colour = gor_name)) +
@@ -1004,7 +1008,7 @@ ggplot(filtered_region, aes(y = P8MEA, x = PPERSABS10, colour = gor_name)) +
 
 We already know that there is a less strong association between the proportion of disadvantaged students in a school and Progress 8, but for completeness, what does disaggregating the scatter plot in @fig-plot8 by Ofsted rating show us? We can see below:
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot14
 #| fig-cap: "Progress 8 vs % Disadvantaged, by OfSted Rating, All Schools in England, 2022/23. Brighton Schools Overlaid."
 
@@ -1028,7 +1032,7 @@ plot +
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot15
 #| fig-cap: "Progress 8 vs % Disadvantaged, by OfSted Rating, All Schools in England, 2022/23."
 
@@ -1043,6 +1047,22 @@ ggplot(filtered_data, aes(y = P8MEA, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
 
 ```
 
+```{r echo=T, message=FALSE, warning=FALSE}
+#| label: fig-plot18
+#| fig-cap: "Progress 8 vs % Disadvantaged, by OfSted Rating, Brighton and Hove Schools Only"
+ggplot(filtered_data) +
+geom_point(data = btn_sub, aes(y = P8MEA, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_smooth(data = btn_sub, aes(y = P8MEA, x = PTFSM6CLA1A), method = "lm", se = TRUE, color = "black") +  # Add linear model line for btn_sub
+  geom_text_repel(data = btn_sub, aes(y = P8MEA, x = PTFSM6CLA1A, label = SCHNAME.x), color = "black", size = 3, nudge_y = c(-1.5, 1.5), force = 10, box.padding = 0.5, max.overlaps = 10, direction = "both") +  # Add linear model line for england_school_2022_23
+  labs(title = "Progress 8 vs % Disadvantaged, 2022-23",
+       x = "% Disadvantaged",
+       y = "Progress 8 measure after adjustment for extreme scores") +
+  theme_minimal()
+
+#export <- btn_sub[,c("P8MEA", "PTFSM6CLA1A")]
+
+```
+
 #### Observations - @fig-plot14 and @fig-plot15
 
 -   In many ways this is a fascinating plot as it shows what a difference the quality of the education at a school makes to disadvantage in a way it doesn't for persistent absence.
@@ -1051,9 +1071,9 @@ ggplot(filtered_data, aes(y = P8MEA, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
 
     -   What this tells us is it's possible for outstanding schools to mitigate the impact of disadvantage, but if the students aren't in the school to begin with, no amount of outstanding teaching will remedy that.
 
--   The slope for Brighton is steeper than the slopes for schools grouped by all levels of Ofsted rating. However, looking at the slope and the points that are influencing it, it is clear that
+-   The slope for Brighton is steeper than the slopes for schools grouped by all levels of Ofsted rating. However, zooming in on the plot (@fig-plot18 - or interactively [here](https://www.desmos.com/calculator/z4nzre9ka0)) and examining the slope and the points that are influencing it, it is clear that:
 
-    -   the distribution of the points means the line is not a very reliable summary (it's a poor model for Brighton and likely statistically insignificant)
+    -   the distribution of the points means the line is not a very reliable summary (it's a poor model for Brighton and likely statistically insignificant after controlling for levels of absence - we will come to this later.)
 
     -   but looking at Kings, Stringer and Varndean, rather than schools with more disadvantaged students doing worse than expected, it is back to [the point I made on advantaged and disadvantaged attainment in the city here](https://adamdennett.github.io/BH_Schools_2/factsheet.html#fact-1---disadvantaged-attainment) - that Brighton and Hove is doing particularly well for its non-disadvantaged students and these schools are helping pull the line up at the top.
 
@@ -1124,13 +1144,13 @@ ggplot(filtered_data, aes(y = PTFSM6CLA1A, x = PERCTOT)) +
 # cor
 ```
 
-## A Model of Attainment  
+## A Model of Attainment
 
-So far we have explored some of the factors that might affect Progress 8 Scores in schools across England through visualisation. This is an incredibly useful starting point - and something I would encourage all of my students to do at the beginning of any piece of similar analysis. But while scatter plots are fantastic at allowing us to explore data with two dimensions (x and y) and while it is possible to explore things in three dimensions (see @fig-plot17 below), we can't go beyond 3-dimensions visually and the analysis starts to become awkward.
+So far we have explored some of the factors that might affect Progress 8 Scores in schools across England through visualisation. This is an incredibly useful starting point - and something I would encourage all of my students to do at the beginning of any piece of similar analysis. But while scatter plots are fantastic at allowing us to explore data with two dimensions ($x$ and $y$) and while it is possible to explore things in three dimensions (see @fig-plot17 below), we can't go beyond 3-dimensions visually and the analysis starts to become awkward.
 
 Fortunately, we have done the ground-work above to allow us to begin to make use of some of the statistics which described our plots, to try to understand how multiple variables can affect attainment and compare them with each other to build a more complete understanding of the relative importance of each of the factors we have already explored in this piece.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot17
 #| fig-cap: "Progress 8 vs % Persistent Absent vs % Disadvantaged, All Schools in England, 2022/23."
 library(plotly)
@@ -1153,19 +1173,19 @@ I'm not going to go into details about regression modelling here - suffice to sa
 
 In the models I will present below, the variables are the names in the original data file, so to be clear, these are:
 
--   P8MEA - School Level Progress 8 Score in 2022/23 at the end of KS4, adjusted for extreme values
+-   **P8MEA** - School Level Progress 8 Score in 2022/23 at the end of KS4, adjusted for extreme values
 
--   PPERSABS10 - Percent of Pupils who are Persistently Absent (missing over 10% of sessions)
+-   **PPERSABS10** - Percent of Pupils who are Persistently Absent (missing over 10% of sessions)
 
--   PTFSM6CLA1A - Percentage of Pupils who are classified as 'disadvantaged' - having received Free School Meals at any point in the preceding 6 years.
+-   **PTFSM6CLA1A** - Percentage of Pupils who are classified as 'disadvantaged' - having received Free School Meals at any point in the preceding 6 years.
 
--   OFSTEDRATING - Ofsted rating at the last inspection
+-   **OFSTEDRATING** - Ofsted rating at the last inspection
 
--   gor_name - name of the Government Office Region the School resides within
+-   **gor_name** - name of the Government Office Region the School resides within
 
-In the regression model, just as in the scatter plots, Progress 8 is the variable on the y-axis. In regression parlance, it is also known as the 'dependent variable'. In the model, we are trying to see what the combined effect the other variables (x-variables, or independent variables) have on explaining variation in Progress 8.
+In the regression model, just as in the scatter plots, Progress 8 is the variable on the $y$-axis. In regression parlance, it is also known as the 'dependent variable'. In the model, we are trying to see what the combined effect the other variables ($x$-variables, or independent variables) have on explaining variation in Progress 8.
 
-When we run the model using a piece of standard statistical software (I'm using R here) we get a series of outputs which tell us how well we can explain y (Progress 8). The main outputs are the same as we saw earlier - an intercept value, some estimates of the slope parameters and an $R^2$ for the whole model.
+When we run the model using a piece of standard statistical software (I'm using R here) we get a series of outputs which tell us how well we can explain $y$ (Progress 8). The main outputs are the same as we saw earlier - an intercept value, some estimates of the slope parameters and an $R^2$ for the whole model.
 
 We also get some other useful pieces of information -
 
@@ -1177,7 +1197,7 @@ We also get some other useful pieces of information -
 
 #### Results - Model 1: Progress 8 \~ % Persistent Absence + % Disadvantage + Ofsted rating
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=T, message=FALSE, warning=FALSE}
 ## regression model
 
 library(gglm)
@@ -1203,10 +1223,12 @@ summ(model, scale = F)
 Plot of Model 1 scaled slope coefficients
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-plot_summs(model, inner_ci_level = .9, scale = TRUE)
-
-
+plot_summs(model, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
 ```
+
+#### Observations and Interpretation - Model 1
+
+\*To complete
 
 #### Results - Model 2: Progress 8 \~ % Persistent Absence + % Disadvantage + Ofsted rating + Government Office Region
 
@@ -1223,6 +1245,14 @@ model2 <- lm(P8MEA ~ PPERSABS10 + PTFSM6CLA1A + OFSTEDRATING + gor_name, data = 
 summ(model2, scale = F)
 ```
 
+```{r}
+plot_summs(model2, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
+```
+
+#### Observations and Interpretation - Model 2
+
+\*To complete
+
 #### Results - Model 13: Progress 8 \~ % Persistent Absense + % Disadvantage - Brighton Only
 
 ```{r}
@@ -1230,13 +1260,24 @@ model3 <- lm(P8MEA ~ PPERSABS10 + PTFSM6CLA1A, data = btn_sub)
 
 #summary(model3)
 
-#vif_values <- car::vif(model)
+#vif_values <- car::vif(model3)
 #vif_values
 
 summ(model3, scale = F)
 
-
 ```
+
+```{r}
+plot_summs(model3, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
+```
+
+#### Observations and Interpretation - Model 3
+
+-   Running a model on just Brighton data in 2022/23 unreliable - not enough observations so weird behaviour going on.
+
+-   At city level, persistent absence and FSM pretty strongly co-linear (not the case nationally) - variance inflation factor above 6. Very high probability that any observations of influence of disadvantage at city level, actually to do with absence instead (given what we have observed at the national level - absence more important than disadvantage).
+
+-   Two variable model for Brighton shows that absence dominates - statistically significant predictor of Progress 8. In the presence of this relationship, disadvantage becomes ***statistically insignificant*** (and weirdly positive).
 
 ## How Bad Policy Will Make Attainment Much Worse
 
@@ -1244,9 +1285,71 @@ Unfortunately, not only is Brighton and Hove City Council misdiagnosing the mala
 
 ### Numbers of Displaced Students Over Time in Brighton and Hove
 
--   Insert council data and plots up to 2030 here
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+displacement_annual <- read_csv(here("data", "displacement_annual.csv"))
+displacement_cumulative <- read_csv(here("data", "displacement_cumulative.csv"))
 
-### Absence and Distance from School 
+displacement_annual_long <- displacement_annual %>%
+  pivot_longer(cols = c(`2026`, `2027`, `2028`, `2029`, `2030`), 
+               names_to = "year", 
+               values_to = "value")
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# displacement_annual_long <- displacement_annual %>%
+#   pivot_longer(cols = c(`2026`, `2027`, `2028`, `2029`, `2030`), 
+#                names_to = "year", 
+#                values_to = "value") %>%
+#   filter(number_categories %in% c("20% Choice Marginal Ballot", "10% Displaced by Marginal Ballot"))
+# 
+# ggplot(displacement_annual_long, aes(x = year, y = value, fill = number_categories)) +
+#   geom_bar(stat = "identity") +
+#   labs(title = "Displacement Annual Data",
+#        x = "Year",
+#        y = "Value",
+#        fill = "Number Categories") +
+#   theme_minimal() +
+#   scale_fill_manual(values = c("20% Choice Marginal Ballot" = "#1f78b4", "10% Displaced by Marginal Ballot" = "#33a02c"))  # Custom colors for categories
+
+```
+
+```{r echo=T, message=FALSE, warning=FALSE}
+displacement_cumulative_long <- displacement_cumulative %>%
+  pivot_longer(cols = c(`2026`, `2027`, `2028`, `2029`, `2030`), 
+               names_to = "year", 
+               values_to = "value") %>%
+  filter(number_categories %in% c("20% Choice Marginal Ballot", "10% Displaced by Marginal Ballot"))
+
+pupils_data <- displacement_cumulative %>%
+  select(number_categories, `2026`, `2027`, `2028`, `2029`, `2030`) %>%
+  filter(number_categories == "Pupils") %>%
+  pivot_longer(cols = c(`2026`, `2027`, `2028`, `2029`, `2030`), 
+               names_to = "year", 
+               values_to = "pupils_value")
+
+combined_data <- merge(displacement_cumulative_long, pupils_data, by = c("number_categories", "year"))
+
+ggplot() +
+  geom_bar(data = pupils_data, aes(x = year, y = pupils_value), stat = "identity", fill = "lightgrey", alpha = 0.5) +
+  geom_bar(data = displacement_cumulative_long, aes(x = year, y = value, fill = number_categories), stat = "identity") +
+  labs(title = "Cumulative numbers of displaced pupils by 2030 (council estimates)",
+       x = "Year",
+       y = "Number of Pupils",
+       fill = "Number Categories") +
+  theme_minimal() +
+  scale_fill_manual(values = c("20% Choice Marginal Ballot" = "#1f78b4", "10% Displaced by Marginal Ballot" = "#33a02c", "Total Pupils Affected" = "lightgrey"))  # Custom colors for categories
+
+
+
+```
+
+#### Observations
+
+\*to complete
+
+### Absence and Distance from School
 
 -   Pupils who live further away from their school are absent more often
 
@@ -1263,3 +1366,7 @@ Research from [fft Education Lab here](https://ffteducationdatalab.org.uk/2023/1
 -   Relationship between disadvantage and Progress 8 in Brighton is statistically insignificant in our study year, so impossible to know impacts of changing FSM distributions through forced out-of-catchment movements
 
 -   Policy is a total gamble on benefits, but clear and reliable detriment on P8 scores across the city for those subjected to it.
+
+# Discussion and Conclusions
+
+\*To complete still

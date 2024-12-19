@@ -14,7 +14,7 @@ website:
     style: "docked"
     search: true
     contents:
-      - text: "Introduction"
+      - text: "About"
         href: about.qmd
       - section: "Absence"
         href: absence.qmd
@@ -28,11 +28,14 @@ website:
       - icon: github
         menu:
           - text: Source Code
-            url:  https://github.com/adamdennett/BH_Schools_2
+            url:  https://github.com/adamdennett/BH_Schools_Consultation
           - text: Report a Bug
-            url:  https://github.com/adamdennett/BH_Schools_2/issues
-  repo-url: https://github.com/adamdennett/BH_Schools_2
+            url:  https://github.com/adamdennett/BH_Schools_Consultation/issues
+  repo-url: https://github.com/adamdennett/BH_Schools_Consultation
   repo-actions: [source, issue]
+  google-analytics: "G-CE74LTF9B1"
+  open-graph: true
+  twitter-card: true
 
 format:
   html:
