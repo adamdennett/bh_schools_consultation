@@ -1591,7 +1591,15 @@ plot_summs(model2, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
 
 #### Observations and Interpretation - Model 2
 
--   Model 2 is essentially the same as Model 1, but
+-   Model 2 is essentially the same as Model 1, but this time incorporates a further 'region' variable.
+
+-   The model fit is better - we are now explaining 60% of the variation in Progress 8 scores with the variables we have chosen. We can, of course, keep building this model and adding additional variables in. For now, as we have explained most of the variance in the model, we will not keep going. In future weeks, I may go further, however.
+
+-    Where we have p-values of \>0.05, these variables are statistically insignificant, so we can ignore their parameters - they are not influencing the model. This is the case for a lot of the regions, however, London sticks out as it is both statistically significant and positive on its effect on attainment. This aligns with observations we have made in previous weeks about the importance of London in England's education story.
+
+-   Most of the other variables don't change much with the addition of regions, however the importance of absence decreases slightly (London having low rates of absence, in accounting for it separately in the model, it makes sense that some of that effect from London disappears). Similarly, the affect of disadvantage increases slightly - again, an impact of including London which has very high levels of disadvantage, but also high levels of attainment in that disadvantage, so including London increases the effect elsewhere.
+
+-   However, even with London in the model, Absence is still the most important factor by far, followed by being an Ofsted outstanding school and not a requires improvement school. Interestingly, the London effect is similar to the disadvantage effect.
 
 #### Results - Model 13: Progress 8 \~ % Persistent Absense + % Disadvantage - Brighton Only
 
@@ -1613,15 +1621,19 @@ plot_summs(model3, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
 
 #### Observations and Interpretation - Model 3
 
--   Running a model on just Brighton data in 2022/23 unreliable - not enough observations so weird behaviour going on.
+-   Running a model on just Brighton data in 2022/23 is unreliable - not enough observations so weird behaviour going on - however we can still look at it, just maybe not draw firm conclusions from the patterns revealed.
 
 -   At city level, persistent absence and FSM pretty strongly co-linear (not the case nationally) - variance inflation factor above 6. Very high probability that any observations of influence of disadvantage at city level, actually to do with absence instead (given what we have observed at the national level - absence more important than disadvantage).
 
 -   Two variable model for Brighton shows that absence dominates - statistically significant predictor of Progress 8. In the presence of this relationship, disadvantage becomes ***statistically insignificant*** (and weirdly positive).
 
-## How Bad Policy Will Make Attainment Much Worse
+-   In Brighton then, despite there being a high correlation between disadvantage and absence, absence is far more important and essentially invalidates any perceived effects on attainment that we may think disadvantage has.
+
+## How Bad Policy Will Make Attainment Even Worse
 
 Unfortunately, not only is Brighton and Hove City Council misdiagnosing the malady and trying to prescribe an incredibly unpopular treatment (moving students away from their local schools and forcing up to 30% of students in the city to attend schools outside of their catchment), it is also the case that the treatment is actually highly likely to make things MUCH WORSE.
+
+The policies in the consultation, especially the 20% open ballot, will lead to up to 30% of the students in the city attending schools outside their catchment. For many, attending schools outside of catchment will mean l
 
 ### Numbers of Displaced Students Over Time in Brighton and Hove
 
