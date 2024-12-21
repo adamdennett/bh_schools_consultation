@@ -39,13 +39,15 @@ library(tidytransit)
 
 -   There is a large body of literature including recent government reports, which states unquivocally that if improving attainment is the goal, then the best way to achieve this is through reducing school absence and in particular, persistent absence.
 
+-   'This paper finds that pupil absence is the main / a pivotal factor for attainment and the attainment gap in Brighton & Hove. And that the measures currently proposed could make this worse rather than better.'
+
 -   Having delved deeply into the national and local data on attainment, disadvantage and absence published by the Department for Education, it is clear that Brighton and Hove has a more serious problem with persistent absence than most other local authorities in England. And it is absence over and above any other factor, including concentrations of disadvantage, that is leading to any reduced levels of attainment observed in the city.
 
 -   Problems of persistent absence are mainly concentrated in two schools - BACA and Longhill - although despite having one of the most serious problems of persistent absence of anywhere in England, BACA actually produces outcomes that are better than expected, given the chronic absence problem it faces.
 
 -   Most of the perceived associations between disadvantage and educational attainment in Brighton are actually a mistaken conflation with persistent absence. The two can be correlated - and they are more so in Brighton than in some other places - but the correlation at the national level is weak. And at the local level, disadvantage becomes statistically insignificant in the presence of persistent absence when trying to explain attainment.
 
--   BHCC has misdiagnosed a perceived 'problem' of disadvantaged attainment and has failed to even acknowledge publicly in any part of the October engagement or the latest consultation that persistent absence is the #1 problem facing the city's schools and hindering the attainment of its pupils. Tacking this should be a priority over and above anything else.
+-   BHCC has misdiagnosed a perceived 'problem' of disadvantaged attainment and has failed to even acknowledge publicly in any part of the October engagement or the latest consultation that persistent absence is the #1 problem facing the city's schools and hindering the attainment of its pupils. Tackling this should be a priority over and above anything else.
 
 -   Statistical Analysis reveals that due to the high average levels of disadvantage in Brighton and Hove (30%), reductions in the % of disadvantaged students in some schools from, say 50% to 30%, is unlikely to have a noticeable impact on either Attainment 8 or Progress 8 scores. With Attainment 8, Schools in Brighton would need to have levels of disadvantage below 15% or so to see any noticeable impact on attainment scores by reducting disadvantage concentrations further - just not likely.
 
@@ -53,7 +55,7 @@ library(tidytransit)
 
 -   In Brighton and Hove in 2022/23, disadvantage becomes a statistically insignificant variable in the presence of persistent absence.
 
--   As a consequence of misdiagnosing the problem, the treatment prescribed by the council not only fails to address the real underlying issue, but it actually stands to make it much worse. The 20% out-of-catchment open admissions criteria, if implemented, will lead to up to 30% of the City's children having to attend a school out of catchment (20% through 'choice' and 10% through forced displacement). Forced long-distance travel and the disconnection between local community, family and school is guaranteed to exacerbate the attendance problem and thus drive down attainment in the city (which currently is above average).
+-   As a consequence of misdiagnosing the problem, the treatment prescribed by the council not only fails to address the real underlying issue, but it actually stands to make it much worse. The 20% out-of-catchment open admissions criteria, if implemented, will lead to up to 30% of the City's children having to attend a school out of catchment (20% through 'choice' and 10% through forced displacement). Forced long-distance travel and the disconnection between local community, family and school is virtually guaranteed to exacerbate the attendance problem and thus drive down attainment in the city (which currently is above average).
 
 -   If the 20% out of catchment priority is implemented then (according to figures derived from the Council Consultation papers) by 2030, some 3,234 pupils a day (out of 10,843 - 1/3) will have to travel to and from school out of catchment. Evidence from FFT education data lab using National Pupil Database data from the UK confirms that pupils who live nearest to school attend more often. Deliberately designing more travel into the school system, given the evidence presented in this piece, can only be viewed as either a conscious move to make educational outcomes for this large proportion of students in the city worse, or a total failure to understand the problem given the stated objectives.
 
@@ -97,17 +99,17 @@ The underpinning assumptions in those statements above and the proposals that fo
 
 But in much the same way as when we go to the doctor, we expect an accurate diagnosis and corresponding efficacious treatment, we all know that unfortunately, sometimes, neither diagnosis nor treatment are correct.
 
-We know the council's prescribed treatment has been influenced quite heavily by some of the work of Stephen Gorard (<https://theconversation.com/poorer-pupils-do-worse-at-school-heres-how-to-reduce-the-attainment-gap-205535>), but before rushing to a Gorardian treatment, do we know that the diagnosis for the city is even correct? Before prescribing a treatment, should we have not carried out a thorough examination of the patient first in case a more serious underlying ailment is causing the symptoms? This is all before we get anywhere near the negative side effects.
+We know the council's prescribed treatment has been influenced quite heavily by some of the work of Stephen Gorard (<https://theconversation.com/poorer-pupils-do-worse-at-school-heres-how-to-reduce-the-attainment-gap-205535>), but as well as misinterpreting some of his main evidence (where disadvantaged students getting access to highly performing schools with low levels of disadvantaged students improves their outcomes), do we know that the council's diagnosis for the city is even correct? Before prescribing a treatment, should we have not carried out a thorough examination of the patient first in case a more serious underlying ailment is causing the symptoms? This is all before we get anywhere near the negative side effects.
 
 Not wanting to strain the metaphor further, how do we know for sure that a lack of mixing is indeed the main factor holding back disadvantaged attainment? What if it is not? And if it is not, what is more important? And if there are more important factors, might there be more effective routes to minimising disadvantaged educational outcomes that could offer better or faster results, and indeed do so without the levels of disruption currently on the table?
 
-These are very important questions to ask, not least because under the current proposals, one of the experimental 'treatments' being prescribed by the council is forced mixing in schools through artificially reducing places in schools for local students and busing (or more likely privately driving) significant numbers of students from some neighbourhoods (some by 'choice' and some through 'displacement' [- see the PGS explainer here](https://www.parentsupport.group/wp-content/uploads/2024/12/schools_admissions_2026_explainer_v1.0_2024-12-4-final.pdf)) to schools a long way from their homes. This kind of forced mixing not only has a questionable history but has huge negative social/community, financial and environmental implications for our city (many of which were [raised in the Parent Support Group's latest deputation at the Labour Cabinet meeting in November](https://www.parentsupport.group/deputation-to-brighton-council-cabinet-5th-dec-2024/)) which have thus-far been ignored by those advocating for the proposals.
+These are very important questions to ask, not least because under the current proposals, one of the experimental 'treatments' being prescribed by the council is forced mixing in schools through artificially reducing places in schools for local students and busing (or for at least 1/4 of children, privately driving) significant numbers of students from some neighbourhoods (some by 'choice' and some through 'displacement' [- see the PGS explainer here](https://www.parentsupport.group/wp-content/uploads/2024/12/schools_admissions_2026_explainer_v1.0_2024-12-4-final.pdf)) to schools a long way from their homes. This kind of forced mixing not only has a questionable history but has huge negative social/community, financial and environmental implications for our city (many of which were [raised in the Parent Support Group's latest deputation at the Labour Cabinet meeting in November](https://www.parentsupport.group/deputation-to-brighton-council-cabinet-5th-dec-2024/)) which have thus-far been ignored by those advocating for the proposals.
 
 And as I will show below, the treatment currently being prescribed by the council, worse than being ineffective, is likely worsen attainment across the city - again, at risk of stretching the metaphor too far, this could be akin 19th Century doctors prescribing arsenic for psoriasis [@sarfraz2023] - it sort of works in some ways, but OH GOD WHAT HAVE YOU DONE!?
 
 ### Is there anything more important than social mixing holding back educational attainment, particularly for disadvantaged pupils?
 
-The short answer is: Yes, yes there is. The longer answer is there are lots of things; from raw income deprivation, requiring SEN support to simply moving schools (see p8 of [@claymore2023] to see the relative effects of some of these) which can have some impact on attainment. But there is one factor, over an above everything else, that affects attainment more than any other: **Absence from School.**
+The short answer is: Yes, yes there is. The longer answer is there are lots of things; from raw income deprivation or requiring SEN support, to simply moving schools (see p8 of [@claymore2023] to see the relative effects of some of these) - all can have some impact on attainment. But there is one factor, over an above everything else, that affects attainment more than any other: **Absence from School.**
 
 ## Absence
 
@@ -590,7 +592,7 @@ ggplot(england_school_2022_23_not_special, aes(x = PPERSABS10)) +
 
 -   King's School and Varndean have better/lower persistent absence rates than average - King's much lower.
 
--   At the other end of the scale, PACA and Hove Park have noticably above-average/worse persistent absence rates, while Longhill has 42.4% of students persistently absent with BACA an outlier with an incredibly high rate of 51.8% making it one of the worst schools for persistent absence in the country.
+-   At the other end of the scale, PACA and Hove Park have noticably above-average/worse persistent absence rates, while Longhill has 42.4% of students persistently absent with BACA an outlier with an incredibly high rate of 51.8% making it a school suffering from one of the the highest rates of persistent absence in the country.
 
 -   The high, above average, city-levels of persistent absence over time shown at the local authority level, appear to be being driven mainly by students who attend two schools - Longhill and BACA
 
@@ -679,7 +681,7 @@ ggplot(england_school_2022_23_not_special, aes(x = PTFSM6CLA1A)) +
 
 ## Attainment
 
-Measuring attainment is tricky. Absolute attainment (number of A\*s at GCSE - sorry, I know we don't have A\*s anymore, showing my age, but you know what I mean) is a crude measure as it fails to take any account of the diversity of schools and their cohorts, so for a number of years now the preferred measure of attainment as been to look at the 'value added' by schools to their pupils by essentially comparing the levels of attainment of pupils when they leave secondary school after their GCSEs, with the levels of attainment they came in with after Primary School.
+Measuring attainment is tricky. Absolute attainment (number of A\*s at GCSE - sorry, I know we don't have A\*s anymore, showing my age, but you know what I mean) is a crude measure as it fails to take any account of the diversity of schools and their cohorts, so for a number of years now the preferred measure of attainment has been to look at the 'value added' by schools to their pupils by essentially comparing the levels of attainment of pupils when they leave secondary school after their GCSEs, with the levels of attainment they came in with after Primary School.
 
 The standard measure of 'value added' used by the government for the last few years is something called the "Progress 8" score. "The score is calculated for each student by comparing their GCSE (or equivalent) results with the results of peers who achieved a similar level of attainment at the end of primary school" [@riordan2021a]. This is done across 8 subjects/qualifications (hence the name), with England and Maths given a double weighting. It is a ratio centred on Zero and generally ranges between -1 and +1 for most schools (when aggregated to school level).
 
@@ -1054,7 +1056,7 @@ The plots above are informative, but we can actually make them work a little har
 
 ### The Ofsted Rating Effect - Persistent Absence
 
-#### Progress 8 
+#### Progress 8
 
 ```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot9
@@ -1215,7 +1217,7 @@ For completeness I have also shown Attainment 8 here, but the patterns are broad
 
 ### Regional Effects - Persistent Absence
 
-For comparison, we can try other data groupings to see if these make reveal anything else within the data. Below in @fig-plot12 and @fig-plot13 the data are grouped according to region. I have done this as we already know from work in previous weeks, that London is an outlier educationally (generally achieving better attainment scores than the rest of the country and doing better by its most disadvantaged pupils).
+For comparison, we can try other data groupings to see if these reveal anything else within the data. Below in @fig-plot12 and @fig-plot13 the data are grouped according to region. I have done this as we already know from work in previous weeks, that London is an outlier educationally (generally achieving better attainment scores than the rest of the country and doing better by its most disadvantaged pupils).
 
 ```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot12
@@ -1291,7 +1293,7 @@ plot +
 
 ### Ofsted and Disadvantage
 
-#### Progress 8 
+#### Progress 8
 
 We already know that there is a less strong association between the proportion of disadvantaged students in a school and Progress 8, but for completeness, what does disaggregating the scatter plot in @fig-plot8 by Ofsted rating show us? We can see below:
 
@@ -1364,7 +1366,7 @@ geom_point(data = btn_sub, aes(y = P8MEA, x = PTFSM6CLA1A, colour = OFSTEDRATING
 
     -   but looking at Kings, Stringer and Varndean, rather than schools with more disadvantaged students doing worse than expected, it is back to [the point I made on advantaged and disadvantaged attainment in the city here](https://adamdennett.github.io/BH_Schools_2/factsheet.html#fact-1---disadvantaged-attainment) - that Brighton and Hove is doing particularly well for its non-disadvantaged students and these schools are helping pull the line up at the top.
 
-#### Attainment 8 
+#### Attainment 8
 
 ```{r echo=T, message=FALSE, warning=FALSE}
 #| label: fig-plot34
@@ -1471,7 +1473,7 @@ But one thing we haven't done yet is look at how much more important persistent 
 #| fig-cap: "% Persistent Absent vs % Disadvantaged, All Schools in England, 2022/23."
 # Base plot with england_school_2022_23
 
-lm_model <- lm(P8MEA ~ PTFSM6CLA1A, data = filtered_data)
+lm_model <- lm(PPERSABS10 ~ PTFSM6CLA1A, data = filtered_data)
 lm_summary <- summary(lm_model)
 lm_coefficients <- lm_summary$coefficients
 intercept <- round(lm_coefficients[1, 1], 2)
@@ -1479,15 +1481,14 @@ slope <- round(lm_coefficients[2, 1], 2)
 r_squared <- round(lm_summary$r.squared, 2)
 
 
-ggplot(filtered_data, aes(y = PTFSM6CLA1A, x = PERCTOT)) +
+ggplot(filtered_data, aes(y = PPERSABS10 , x = PTFSM6CLA1A)) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE) +  # Add linear model line for england_school_2022_23
   labs(title = "% Persistent Absence vs % Disadvantaged",
        x = "% Disadvantaged",
        y = "% Persistent Absence") +
   theme_minimal() +
-  annotate("text", x = 35, y = Inf, label = paste("Intercept:", intercept, "\nSlope:", slope, "\nR²:", r_squared), hjust = 1.1, vjust = 2, size = 5, color = "black") +
-  xlim(0, 35)
+  annotate("text", x = 85, y = Inf, label = paste("Intercept:", intercept, "\nSlope:", slope, "\nR²:", r_squared), hjust = 1.1, vjust = 2, size = 5, color = "black") 
 
 
 ```
@@ -1547,7 +1548,7 @@ We also get some other useful pieces of information -
 
 -   a 'standard error' number - this is essentially a numeric representation of how close or far the black dots not on the blue line in @fig-plot7 and @fig-plot8 are away from that line. Big standard errors relative to the slope value show that that value is probably not reliable.
 
--   a t-statistic. This is useful as it is the slope value divided by the standard error and has the useful properly of then effectively being standardised and so comparable with other t-values in the model. I often use them as a short-hand for indicating which variables in the model are most important.
+-   a t-statistic. This is useful as it is the slope value divided by the standard error and has the properly of then effectively being standardised and so comparable with other t-values in the model. I often use them as a short-hand for indicating which variables in the model are most important.
 
 -   a p-value. The p-value is calcuated from the t-statistic and is a shorthand for determining whether a variable is 'statistically significant' in the model. I won't go into the detail now, but the rule-of-thumb frequently used in statistics is if the p-value is less than 0.05, then this says that there is a greater than 0.95 (95%) probability that the slope value / estimate is reliable and a true relationship between the x variable in question and the y variable we are trying to predict. 95% confidence is the usual stamp of approval in a statistical analysis.
 
@@ -1659,7 +1660,7 @@ ggplot(filtered_region, aes(x = PPERSABS10)) +
 
 -   The model fit is better - we are now explaining 60% of the variation in Progress 8 scores with the variables we have chosen. We can, of course, keep building this model and adding additional variables in. For now, as we have explained most of the variance in the model, we will not keep going. In future weeks, I may go further, however.
 
--    Where we have p-values of \>0.05, these variables are statistically insignificant, so we can ignore their parameters - they are not influencing the model. This is the case for a lot of the regions, however, London sticks out as it is both statistically significant and positive on its effect on attainment. This aligns with observations we have made in previous weeks about the importance of London in England's education story.
+-   Where we have p-values of \>0.05, these variables are statistically insignificant, so we can ignore their parameters - they are not influencing the model. This is the case for a lot of the regions, however, London sticks out as it is both statistically significant and positive on its effect on attainment. This aligns with observations we have made in previous weeks about the importance of London in England's education story.
 
 -   Most of the other variables don't change much with the addition of regions, however the importance of absence decreases slightly (London having low rates of absence, in accounting for it separately in the model, it makes sense that some of that effect from London disappears). Similarly, the affect of disadvantage increases slightly - again, an impact of including London which has very high levels of disadvantage, but also high levels of attainment in that disadvantage, so including London increases the effect elsewhere.
 
@@ -1709,7 +1710,7 @@ plot_summs(model3, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
 
 -   Multiple regression models allow us to take the same underlying principles for making associations between continuous variables as scatter plots, but allow us to do so in multiple dimensions at the same time.
 
--   Multiple regression is particularly useful as including a number of independent variables at the same time in a model allows to their effects on the dependent variable to be evaluated at the same time. This is particularly useful when there might be some degree of correlation between independent variables such as in our case with persistent absence and disadvantage.
+-   Multiple regression is particularly useful as including a number of independent variables at the same time in a model allows for their effects on the dependent variable to be evaluated at the same time. This is particularly useful when there might be some degree of correlation between independent variables such as in our case with persistent absence and disadvantage.
 
 -   Levels of correlation between these two variables were not high enough to cause problems of double counting (known as 'multicollinearity' in statistical terms) but enough that any apparent effects of disadvantage are overridden by the more important absence factors.
 
@@ -1725,11 +1726,11 @@ plot_summs(model3, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
 
 ## How Bad Policy Will Make Attainment Even Worse
 
-Unfortunately, not only is Brighton and Hove City Council misdiagnosing the malady and trying to prescribe an incredibly unpopular treatment (moving students away from their local schools and forcing up to 30% of students in the city to attend schools outside of their catchment), it is also the case that the treatment is actually highly likely to make things MUCH WORSE.
+Unfortunately, not only is Brighton and Hove City Council misdiagnosing the malady and trying to prescribe an incredibly unpopular treatment (moving students away from their local schools and manufacturing a situation where up to 30% of students in the city have to attend schools outside of their catchment), it is also the case that the treatment is actually highly likely to make things MUCH WORSE.
 
 The policies in the consultation, especially the 20% open ballot, will lead to up to 30% of the students in the city attending schools outside their catchment. For many, attending schools outside of catchment will mean long journeys on public transport with distance of travel to school having a direct impact on attendance, as will be shown below.
 
-The scale of the deliberate displacement proposed, however, is unprecedented. The council have tried to argue that they have 'never guaranteed a place at any school to any student' - which I'm sure is true. But to my mind they have also never actively engaged in trying to stop students from attending their local schools in the name of an ill-conceived educational experiment.
+The scale of the deliberate displacement proposed, however, is unprecedented. The council have tried to argue that they have 'never guaranteed a place at any school to any student' - which I'm sure is true. But to my mind they have also never actively engaged in trying to stop students from attending their local schools in the name of an ill-conceived educational experiment. And they have also stated in the past that their broad aim is to match the number of places in a catchment area to the number of students in the catchment area - this is a significant departure.
 
 ### Numbers of Displaced Students Over Time in Brighton and Hove
 
@@ -1797,11 +1798,13 @@ ggplot() +
 
 -   If implemented in 2026, 454 students will be permitted to attend out of catchment schools through 'choice' (inverted commas as for some, a 4th choice will be a low down priority, but still treated above that of a 1st choice, non-sibling, non-FSM child within catchment). As a result of this 'choice' a further 223 children will be displaced from their own catchments as there will be no places left at their catchment schools.
 
--   In the first year, the total number of displaced students travelling long distances will be 677 - according to the figures released by the council (student estimates, multiplied by published probabilities).
+-   In the first year, the total number of displaced students will be 677 - according to the figures released by the council (student estimates, multiplied by published probabilities).
 
 -   Each subsequent year a similar number of students is added to the travel pile until in 2030, 3,234 students every day have to travel to schools outside of their catchment area. 1/3 of the city's student population.
 
--   I will not reiterate the environmental, social and community impacts of this as they have been voiced many times and they alone should be enough to make the council pause. However, here I am just focusing on educational outcomes, so lets look at those.
+-   We know the council is having serious financial challenges at present and it has a statutory duty to pay the bus fares for [all journeys greater than 3-miles](https://www.gov.uk/free-school-transport). In Brighton and Hove, currently the [annual cost of a bus ticket is currently £445](https://www.buses.co.uk/child) - so even if, say, 1,000 of those 3,234 students travel over 3-miles, this will be an annual cost to the Council of £445,000.
+
+-   I will not reiterate the environmental, social and community impacts of this as they have been voiced many times and they alone should be enough to make the council pause. However, here I am just focusing on educational outcomes, so let's look at those.
 
 ### Absence and Distance from School
 
@@ -1817,7 +1820,7 @@ Pupils who live further away from their school are absent more often. This is a 
 
 -   Relationship between disadvantage and Progress 8 in Brighton is statistically insignificant in our study year, so impossible to know impacts of changing FSM distributions through forced out-of-catchment movements
 
--   Policy is a total gamble on benefits, but clear and reliable detriment on P8 scores across the city for those subjected to it.
+-   Policy is a total gamble on benefits, but clear and reliable detriment on attainment scores across the city for those subjected to it.
 
 # Discussion and Conclusions
 
@@ -1827,14 +1830,28 @@ Persistent Absence from School has been entirely absent from any of the debate o
 
 Why?
 
-I don't know the answer. However this kind of thing has sadly been seen many times before. "Project Fear". "Remoaners". Those who like the "Status Quo". People who have genuine fears about the negative negative impacts of policy but also realise that that policy might whiff a bit. And dare to raise concerns or ask for evidence or merely just to see someone's workings. I hope, however, that this piece of work has helped fill another information void.
+I don't know the answer. However this kind of thing has sadly been seen many times before. "Project Fear". "Remoaners". Those who like the "Status Quo". People who have genuine fears about the negative impacts of policy but also realise that that policy might whiff a bit. And dare to raise concerns or ask for evidence or merely just to see someone's workings. I hope, however, that this piece of work has helped fill another information void.
 
 I have said it again and the evidence is here again - Brighton actually does very well for its school pupils on the whole. Most schools are doing brilliantly well in absolute terms. Others are doing brilliantly well against all the odds. One is not doing so well on most metrics.
 
 Forced social mixing through busing is the wrong solution to an ill-defined and misunderstood problem. The 20% open allocation which will lead to serious displacement of students in the city is simply bad policy. The evidence is here that it won't work. And in the process of not working, it will cause irreparable harm to the social fabric of the city, breaking up communities and forcing more families out. It would be a bad policy on these terms even if it stood some chance of working, but with no chance of affecting meaningful change to the stated aims of the exercise, it should be consigned to the bin right now.
 
-Misdiagnosis of the problem and failure to understand the problem also does the residents of the wards who thought they might have benefited, a disservice though a lack of understanding too. On top of this is a further disservice to the schools in their wards who would benefit from being community schools. Watching some ward councillors on facebook encouraging their constituents to support policies that will actively harm the children in their areas through likely increasing absence rates, is difficult to watch. Schools like BACA need the support of their local communities and their local politicians. And the evidence in this piece of analysis points to them doing incredibly well in difficult circumstances compared to what we could expect. But to have councillors implicitly talking down their local community schools through actively encouraging their constituents to support 'choice' based policies to take them away and with uncertain and likely detrimental outcomes - almost certainly though ignorance rather than intended mallice - I believe these councillors want to do the right thing - from the perspective of someone who always starts with data and evidence first, is incredibly frustrating.
+Misdiagnosis of the problem and failure to understand the problem also does the residents of the wards who thought they might have benefited, a disservice though a lack of understanding too. On top of this is a further disservice to the schools in their wards who would benefit from being community schools. Watching some ward councillors on facebook encouraging their constituents to support policies that will actively harm the children in their areas through likely increasing absence rates, is difficult to watch. Schools like BACA need the support of their local communities and their local politicians. And the evidence in this piece of analysis points to them doing incredibly well in difficult circumstances compared to what we could expect. But to have councillors implicitly talking down their local community schools through actively encouraging their constituents to support 'choice' based policies to take them away and with uncertain and likely detrimental outcomes - almost certainly though ignorance rather than intended malice - I believe these councillors want to do the right thing - from the perspective of someone who always starts with data and evidence first, is incredibly frustrating.
 
 I hope this piece of work can help those councillors too.
+
+We have at times, during this process, been challenged to come up with solutions to the problem of educational disadvantage in the city. [I have already offered some in relation to the challenges the Longhill faces](https://adamdennett.github.io/BH_Schools_2/schools_wk3.html#brightopia), but here I will offer another: rather than wasting hundreds of thousands of pounds every year busing students across the city to schools they would rather not go to, impacting their education negatively as they go; why not invest that money an a proper city-wide programme to tackle the persistent absence problem the city has? £445,000 per year never goes as far as you think - having employed many researchers over the years at my university, I realise this - however, this is the kind of money that could fund a small dedicated team within the council to tasked with working with families of students whose attendance is an issue.
+
+The [Social Mobility Commission are clear](https://www.gov.uk/government/publications/against-the-odds/against-the-odds-achieving-greater-progress-for-secondary-students-facing-socio-economic-disadvantage), mixing intakes is not going to make the absence problem better:
+
+> The fieldwork indicates that schools where they make exceptional progress \[on absence\] are more likely to have either a very small or a very large proportion of pupil premium students. Schools with less extreme proportions (likely to be defined as ‘local schools’ in our [school typology](http://educationobservatory.co.uk/pupilpremiumprimer/what-kind-of-school-are-you/)) find it much more difficult to help such students to progress.
+
+But they go on to say:
+
+> Our survey indicates that how schools approach the challenge of improving student attendance is important. Not all strategies are associated with higher progress for pupil premium students:
+>
+> -   a home-centred approach to student attendance (for example meeting parents, making home visits, collecting students from home) is associated with higher progress
+
+So I would propose that the money that the council would have wasted on bus journeys no student wants to make, is re-invested in a home-centred programme of absence-reduction, working with families and schools together. I would hope that they could garner support from organisations in the city like Class Divide, who have connections to communities and who might also see the benefits of this kind of approach and together affect some real positive change on this issue.
 
 Adam Dennett, 21/12/24
