@@ -1,0 +1,75 @@
+---
+title: "postgres_import"
+author: "Adam Dennett"
+---
+
+```{r}
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(rpostgis)
+library(tidyverse)
+
+
+con <- dbConnect(RPostgres::Postgres(), 
+                 dbname = 'gisdb2',
+                 host = 'localhost',
+                 port = 5432,
+                 user = 'postgres',
+                 password = 'postgres',
+                 sslmode = 'disable')
+
+#check connection
+dbListTables(con)
+```
+
+```{r}
+
+# Define file paths
+#header_file <- "D:/OSAddressBase/e93/plus/FULL/CSV/AddressBase-Plus-Header1.1.csv"
+#data_file <- "D:/OSAddressBase/e93/plus/FULL/CSV/AB_Plus_Data.csv"
+
+# Read header file and use it as the column names for the data file
+#headers <- read_csv(header_file, col_names = FALSE)
+ONSPD_FEB_2024_UK <- read_csv("D:/ONSPD_FEB_2024_UK/Data/ONSPD_FEB_2024_UK.csv")
+
+
+
+# Import data into PostgreSQL
+dbWriteTable(con, "ONSPD_FEB_2024_UK", ONSPD_FEB_2024_UK, overwrite = TRUE, row.names = FALSE)
+
+# Close the connection
+dbDisconnect(con)
+
+cat("Data import completed successfully!\n")
+
+```
+
+```{r}
+library(sf)
+library(zip)
+
+# Define the zip file path and the shapefile name
+zip_file <- "D:/Download_CodePointWithPolygons_2353533/codepoint-poly_5218782/two_letter_pc_code/bn.zip"
+shapefile_name <- "bn.shp"
+
+# Unzip the shapefile
+unzip(zip_file, exdir = tempdir())
+
+# Set the SHAPE_RESTORE_SHX configuration option to YES
+Sys.setenv(SHAPE_RESTORE_SHX = "YES")
+
+# Construct the path to the unzipped shapefile
+shapefile_path <- file.path(tempdir(), shapefile_name)
+
+# Read the shapefile
+shapefile_data <- st_read(shapefile_path)
+
+# Print the first few rows of the shapefile data
+print(head(shapefile_data))
+
+# Write the shapefile data to the PostgreSQL table 
+dbWriteTable(con, "bn_codepoint_poly", shapefile_data, overwrite = TRUE, row.names = FALSE)
+
+
+```

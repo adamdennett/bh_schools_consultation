@@ -1,0 +1,226 @@
+---
+title: "Travel"
+author: "Adam Dennett"
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
+library(tidyr)
+library(dplyr)
+library(writexl)
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(usethis)
+library(tmap)
+library(readxl)
+library(r5r)
+library(RColorBrewer)
+library(accessibility)
+library(data.table)
+library(ggplot2)
+library(interp)
+library(h3jsr)
+library(h3r)
+library(osmextract)
+library(stplanr)
+library(od)
+library(tidytransit)
+library(gtsf)
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(rpostgis)
+```
+
+```{r}
+#connect to a local database to store some data later on
+con <- dbConnect(RPostgres::Postgres(), 
+                 dbname = 'gisdb2',
+                 host = 'localhost',
+                 port = 5432,
+                 user = 'postgres',
+                 password = 'postgres',
+                 sslmode = 'disable')
+
+#check connection
+dbListTables(con)
+```
+
+
+## School Accessibility Analysis
+
+To carry out an accessibility analysis, information on the full road network in Brighton and Hove is required. This can be obtained from Open Street Map
+
+The R5R package - <https://ipeagit.github.io/r5r/> - can be used to calculate the travel times between all of the Output Areas and Schools in Brighton and Hove by car, foot and bus.
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+data_path = here("data", "r5rBrighton")
+# Check what files we have
+#list.files(data_path)
+rJavaEnv::java_check_version_rjava()
+# Allow 30 GiB of memory
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+r5r_core <- setup_r5(data_path = data_path)
+
+```
+
+
+```{r}
+#get some output areas
+brighton_oa <- st_read(here("data","oa_brighton.geojson"))
+#get some roads
+roads_w_sussex = oe_get(c("West Sussex"), stringsAsFactors = FALSE, quiet = TRUE)
+roads_e_sussex = oe_get(c("East Sussex"), stringsAsFactors = FALSE, quiet = TRUE)
+#names(roads_w_sussex)
+#summary(roads_w_sussex)
+
+ht = c("motorway", "trunk", "primary", "secondary", "tertiary", "residential", "unclassified", "service")
+osm_w_sussex_maj_roads = roads_w_sussex[roads_w_sussex$highway %in% ht, ]
+#class(osm_w_sussex_maj_roads)
+osm_e_sussex_maj_roads = roads_e_sussex[roads_e_sussex$highway %in% ht, ]
+
+osm_sussex_maj_roads <- rbind(osm_w_sussex_maj_roads, osm_e_sussex_maj_roads) %>% st_transform(27700)
+#summary(osm_sussex_maj_roads)
+#summary(brighton_oa)
+
+#osm_roads_buffered <- st_buffer(osm_sussex_maj_roads, dist = 100)
+brighton_oa_buffer <- st_buffer(brighton_oa, dist = 500)
+brighton_blob <- st_union(brighton_oa_buffer)
+
+#tm_shape(brighton_blob) +
+ # tm_polygons(alpha = 0.5)
+
+brighton_roads <- st_intersection(osm_sussex_maj_roads, brighton_blob)
+
+tmap_mode("view")
+tm_shape(brighton_roads) +
+  tm_lines()
+
+#going to need to write this out as a shapefile and then use JOSM to convert to a PBF file - https://josm.openstreetmap.de/ 
+#st_write(brighton_roads, "data/brighton_roads.shp", append=FALSE)
+
+```
+
+```{r}
+#write Brighton Roads back into postgres for some routing stuff later on
+dbWriteTable(con, name="brighton_roads", value=brighton_roads, overwrite=TRUE)
+
+```
+
+```{r}
+#Fix the school and school data so r5 can handle it
+#schools first
+
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700) %>% 
+  st_transform(4326) %>% 
+  st_set_crs(4326)
+
+bh_sec_sch <- brighton_sec_schools %>% 
+  select(urn, establishment_name, geometry) %>%
+  rename(id = urn)
+
+coords <- st_coordinates(bh_sec_sch)
+bh_sec_sch$lon <- coords[, 1]
+bh_sec_sch$lat <- coords[, 2]
+
+#summary(bh_sec_sch)
+
+#now the output areas
+#brighton_oa_points_r5 <- brighton_oa_points %>% 
+#  select(gid, oa21cd,lat, long) %>% 
+#  rename(lon = long, lat = lat, id = gid) %>% 
+#  st_transform(4326) %>% 
+#  st_set_crs(4326)
+
+#summary(brighton_oa_points_r5)
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+#visualise the spatial data
+brighton_outline <- st_union(brighton_oa) %>% st_transform(4326)
+brighton_outline_wgs <- st_union(brighton_oa) %>% st_transform(4326)
+brighton_outline_bng <- st_union(brighton_oa)
+#summary(brighton_oa)
+
+# qtm(brighton_outline, fill = "white") +
+#   qtm(brighton_oa_points_r5, size = 0.5, col = "red") +
+#   qtm(bh_sec_sch, size = 0.5, col = "blue")
+
+brighton_h3 <- polygon_to_cells(brighton_oa, res = 10, simple = F)
+brighton_h3 <- cell_to_polygon(unlist(brighton_h3$h3_addresses), simple = FALSE)
+brighton_h3 <- brighton_h3[brighton_outline,]
+brighton_h3_centroids <- st_centroid(brighton_h3)
+
+tmap_options(check.and.fix = TRUE)
+qtm(brighton_h3, alpha = 0.5) 
+
+```
+
+```{r}
+con <- dbConnect(RPostgres::Postgres(), 
+                 dbname = 'gisdb2',
+                 host = 'localhost',
+                 port = 5432,
+                 user = 'postgres',
+                 password = 'postgres',
+                 sslmode = 'disable')
+
+# Read data from the specified table
+bn_postcodes <- st_read(con, query = "SELECT * FROM public.bn_codepoint_poly")
+bn_postcodes <- st_set_crs(bn_postcodes, 27700)
+
+dbDisconnect(con)
+
+bn_postcode_centroids <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>% 
+  st_as_sf(coords = c("long", "lat")) %>% 
+  st_set_crs(4326) %>% 
+  st_transform(27700)
+
+bn_filtered_postcodes <- bn_postcode_centroids[st_intersects(bn_postcode_centroids, brighton_outline_bng, sparse = FALSE), ]
+
+bn_filtered_postcodes_wgs <- st_transform(bn_filtered_postcodes, 4326)
+
+qtm(bn_filtered_postcodes_wgs)
+```
+
+```{r}
+#get postcode centroids as origins
+bn_pcds_r5r <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>% 
+  filter(oslaua == "E06000043") %>%
+  select(c("pcds","lat", "long")) %>% 
+  rename("id" = "pcds", "lon" = "long")
+
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+#pick a destination school
+
+# 114579 Varndean School
+# 114580 Dorothy Stringer School
+# 114581 Longhill High School 
+# 114606 Blatchington Mill School
+# 114607 Hove Park School and Sixth Form Centre
+# 114608 Patcham High School
+# 114611 Cardinal Newman Catholic School
+# 136164 Brighton Aldridge Community Academy
+# 137063 Portslade Aldridge Community Academy
+# 139409 King's School 
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114581")
+
+```
+
+
