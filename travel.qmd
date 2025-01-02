@@ -3,7 +3,7 @@ title: "Travel"
 author: "Adam Dennett"
 ---
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
+```{r Setup-Libraries echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
 library(tidyr)
 library(dplyr)
 library(writexl)
@@ -33,7 +33,7 @@ library(RPostgres)
 library(rpostgis)
 ```
 
-```{r}
+```{r Connect-to-Database}
 #connect to a local database to store some data later on
 con <- dbConnect(RPostgres::Postgres(), 
                  dbname = 'gisdb2',
@@ -47,14 +47,13 @@ con <- dbConnect(RPostgres::Postgres(),
 dbListTables(con)
 ```
 
-
 ## School Accessibility Analysis
 
 To carry out an accessibility analysis, information on the full road network in Brighton and Hove is required. This can be obtained from Open Street Map
 
 The R5R package - <https://ipeagit.github.io/r5r/> - can be used to calculate the travel times between all of the Output Areas and Schools in Brighton and Hove by car, foot and bus.
 
-```{r, warning=FALSE, message=FALSE, echo=FALSE}
+```{r, r5r-initial-setup warning=FALSE, message=FALSE, echo=FALSE}
 data_path = here("data", "r5rBrighton")
 # Check what files we have
 #list.files(data_path)
@@ -68,8 +67,7 @@ r5r_core <- setup_r5(data_path = data_path)
 
 ```
 
-
-```{r}
+```{r osm-download}
 #get some output areas
 brighton_oa <- st_read(here("data","oa_brighton.geojson"))
 #get some roads
@@ -105,13 +103,13 @@ tm_shape(brighton_roads) +
 
 ```
 
-```{r}
+```{r write-to-database}
 #write Brighton Roads back into postgres for some routing stuff later on
 dbWriteTable(con, name="brighton_roads", value=brighton_roads, overwrite=TRUE)
 
 ```
 
-```{r}
+```{r get-schools-info}
 #Fix the school and school data so r5 can handle it
 #schools first
 
@@ -133,20 +131,12 @@ coords <- st_coordinates(bh_sec_sch)
 bh_sec_sch$lon <- coords[, 1]
 bh_sec_sch$lat <- coords[, 2]
 
-#summary(bh_sec_sch)
 
-#now the output areas
-#brighton_oa_points_r5 <- brighton_oa_points %>% 
-#  select(gid, oa21cd,lat, long) %>% 
-#  rename(lon = long, lat = lat, id = gid) %>% 
-#  st_transform(4326) %>% 
-#  st_set_crs(4326)
+dbWriteTable(con, name="brighton_sec_schools", value=brighton_sec_schools, overwrite=TRUE)
 
-#summary(brighton_oa_points_r5)
 ```
 
-
-```{r, warning=FALSE, message=FALSE, echo=FALSE}
+```{r, h3-setup warning=FALSE, message=FALSE, echo=FALSE}
 #visualise the spatial data
 brighton_outline <- st_union(brighton_oa) %>% st_transform(4326)
 brighton_outline_wgs <- st_union(brighton_oa) %>% st_transform(4326)
@@ -167,7 +157,7 @@ qtm(brighton_h3, alpha = 0.5)
 
 ```
 
-```{r}
+```{r get-postcodes}
 con <- dbConnect(RPostgres::Postgres(), 
                  dbname = 'gisdb2',
                  host = 'localhost',
@@ -203,10 +193,10 @@ bn_pcds_r5r <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>%
 
 ```
 
-
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
 #pick a destination school
 
+# URN    School
 # 114579 Varndean School
 # 114580 Dorothy Stringer School
 # 114581 Longhill High School 
@@ -221,6 +211,904 @@ bn_pcds_r5r <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>%
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114581")
 
+optionZ <- st_read(here("data","optionZa.geojson"))
+```
+
+Travel Times to Longhill at 7:30 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114581")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 7:30:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_longhill = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_longhill = aggregate(ttm_brighton_pcds_2_longhill$travel_time_p50, by=list(ttm_brighton_pcds_2_longhill$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_longhill <- rename(pcds_2_longhill, id = Group.1) 
+pcds_2_longhill <- rename(pcds_2_longhill, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_longhill = inner_join(bn_pcds_r5r, pcds_2_longhill, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_longhill$time <- as.numeric(pcds_geo_longhill$time)
+
+# Create a new column for conditional colors
+pcds_geo_longhill$color <- ifelse(pcds_geo_longhill$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_longhill) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+```{r}
+library(tmap)
+# Ensure 'time' is numeric
+pcds_geo_longhill$time <- as.numeric(pcds_geo_longhill$time)
+
+# Create a new column for conditional colors
+pcds_geo_longhill$color <- ifelse(pcds_geo_longhill$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_longhill) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom")) +
+tm_shape(optionZ) +
+  tm_polygons(alpha = 0)
+
+
+```
+
+Travel Times to BACA at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "136164")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_baca = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_baca = aggregate(ttm_brighton_pcds_2_baca$travel_time_p50, by=list(ttm_brighton_pcds_2_baca$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_baca <- rename(pcds_2_baca, id = Group.1) 
+pcds_2_baca <- rename(pcds_2_baca, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_baca = inner_join(bn_pcds_r5r, pcds_2_baca, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_baca$time <- as.numeric(pcds_geo_BACA$time)
+
+# Create a new column for conditional colors
+pcds_geo_baca$color <- ifelse(pcds_geo_baca$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_baca) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+```{r}
+# set inputs
+origins = bh_sec_sch1
+destinations = bn_pcds_r5r %>% filter(id == "BN1 6PG")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+#origins <- poi[10,]
+#destinations <- poi[12,]
+mode = c("WALK", "TRANSIT")
+max_walk_time = 30 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:30:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+
+##calc expanded ttm
+ettm <- expanded_travel_time_matrix(r5r_core = r5r_core,
+                          origins = origins,
+                          destinations = destinations,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          breakdown = TRUE,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+
+# calculate detailed itineraries
+det <- detailed_itineraries(r5r_core = r5r_core,
+                            origins = origins,
+                            destinations = destinations,
+                            mode = mode,
+                            departure_datetime = departure_datetime,
+                            max_walk_time = max_walk_time,
+                            shortest_path = T)
+
+head(det)
+
+tmap_mode("view")  # Set the mode to interactive viewing
+
+tm_shape(det) +
+  tm_lines(col = "mode", palette = "-viridis", lwd = 2, alpha = 0.7, title.col = "Segment") 
 ```
 
 
+Travel Times to Varndean at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114579")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_varndean = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_varndean = aggregate(ttm_brighton_pcds_2_varndean$travel_time_p50, by=list(ttm_brighton_pcds_2_varndean$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_varndean <- rename(pcds_2_varndean, id = Group.1) 
+pcds_2_varndean <- rename(pcds_2_varndean, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_varndean = inner_join(bn_pcds_r5r, pcds_2_varndean, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_varndean$time <- as.numeric(pcds_geo_varndean$time)
+
+# Create a new column for conditional colors
+pcds_geo_varndean$color <- ifelse(pcds_geo_varndean$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_varndean) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+```{r}
+# set inputs
+origins = bh_sec_sch1
+destinations = bn_pcds_r5r %>% filter(id == "BN2 5RS")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+#origins <- poi[10,]
+#destinations <- poi[12,]
+mode = c("WALK", "TRANSIT")
+max_walk_time = 30 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+
+##calc expanded ttm
+ettm <- expanded_travel_time_matrix(r5r_core = r5r_core,
+                          origins = origins,
+                          destinations = destinations,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          breakdown = TRUE,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+
+# calculate detailed itineraries
+det <- detailed_itineraries(r5r_core = r5r_core,
+                            origins = origins,
+                            destinations = destinations,
+                            mode = mode,
+                            departure_datetime = departure_datetime,
+                            max_walk_time = max_walk_time,
+                            shortest_path = T)
+
+head(det)
+
+tmap_mode("view")  # Set the mode to interactive viewing
+
+tm_shape(det) +
+  tm_lines(col = "mode", palette = "-viridis", lwd = 2, alpha = 0.7, title.col = "Segment") 
+```
+
+
+
+Travel Times to Dorothy Stringer at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114580")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_ds = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_ds = aggregate(ttm_brighton_pcds_2_ds$travel_time_p50, by=list(ttm_brighton_pcds_2_ds$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_ds <- rename(pcds_2_ds, id = Group.1) 
+pcds_2_ds <- rename(pcds_2_ds, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_ds = inner_join(bn_pcds_r5r, pcds_2_ds, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_ds$time <- as.numeric(pcds_geo_ds$time)
+
+# Create a new column for conditional colors
+pcds_geo_ds$color <- ifelse(pcds_geo_ds$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_ds) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+Travel Times to Patcham School at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114608")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_patcham = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_patcham = aggregate(ttm_brighton_pcds_2_patcham$travel_time_p50, by=list(ttm_brighton_pcds_2_patcham$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_patcham <- rename(pcds_2_patcham, id = Group.1) 
+pcds_2_patcham <- rename(pcds_2_patcham, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_patcham = inner_join(bn_pcds_r5r, pcds_2_patcham, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_patcham$time <- as.numeric(pcds_geo_patcham$time)
+
+# Create a new column for conditional colors
+pcds_geo_patcham$color <- ifelse(pcds_geo_patcham$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_patcham) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+Travel Times to Cardinal Newman School at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114611")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_cardinal_n = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_cardinal_n = aggregate(ttm_brighton_pcds_2_cardinal_n$travel_time_p50, by=list(ttm_brighton_pcds_2_cardinal_n$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_cardinal_n <- rename(pcds_2_cardinal_n, id = Group.1) 
+pcds_2_cardinal_n <- rename(pcds_2_cardinal_n, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_cardinal_n = inner_join(bn_pcds_r5r, pcds_2_cardinal_n, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_cardinal_n$time <- as.numeric(pcds_geo_cardinal_n$time)
+
+# Create a new column for conditional colors
+pcds_geo_cardinal_n$color <- ifelse(pcds_geo_cardinal_n$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_cardinal_n) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+Travel Times to Blatchington Mill School at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114606")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_blatchington = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_blatchington = aggregate(ttm_brighton_pcds_2_blatchington$travel_time_p50, by=list(ttm_brighton_pcds_2_blatchington$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_blatchington <- rename(pcds_2_blatchington, id = Group.1) 
+pcds_2_blatchington <- rename(pcds_2_blatchington, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_blatchington = inner_join(bn_pcds_r5r, pcds_2_blatchington, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_blatchington$time <- as.numeric(pcds_geo_blatchington$time)
+
+# Create a new column for conditional colors
+pcds_geo_blatchington$color <- ifelse(pcds_geo_blatchington$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_blatchington) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+
+Travel Times to Hove Park School at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114607")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_hove_park = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_hove_park = aggregate(ttm_brighton_pcds_2_hove_park$travel_time_p50, by=list(ttm_brighton_pcds_2_hove_park$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_hove_park <- rename(pcds_2_hove_park, id = Group.1) 
+pcds_2_hove_park <- rename(pcds_2_hove_park, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_hove_park = inner_join(bn_pcds_r5r, pcds_2_hove_park, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_hove_park$time <- as.numeric(pcds_geo_hove_park$time)
+
+# Create a new column for conditional colors
+pcds_geo_hove_park$color <- ifelse(pcds_geo_hove_park$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_hove_park) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+
+Travel Times to King's School at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "139409")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_kings = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_kings = aggregate(ttm_brighton_pcds_2_kings$travel_time_p50, by=list(ttm_brighton_pcds_2_kings$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_kings <- rename(pcds_2_kings, id = Group.1) 
+pcds_2_kings <- rename(pcds_2_kings, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_kings = inner_join(bn_pcds_r5r, pcds_2_kings, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_kings$time <- as.numeric(pcds_geo_kings$time)
+
+# Create a new column for conditional colors
+pcds_geo_kings$color <- ifelse(pcds_geo_kings$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_kings) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+
+Travel Times to PACA at 8:00 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "137063")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:00:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_paca = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_paca = aggregate(ttm_brighton_pcds_2_paca$travel_time_p50, by=list(ttm_brighton_pcds_2_paca$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_paca <- rename(pcds_2_paca, id = Group.1) 
+pcds_2_paca <- rename(pcds_2_paca, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_paca = inner_join(bn_pcds_r5r, pcds_2_paca, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_paca$time <- as.numeric(pcds_geo_paca$time)
+
+# Create a new column for conditional colors
+pcds_geo_paca$color <- ifelse(pcds_geo_paca$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_paca) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+
+Join everything together
+
+```{r}
+
+# Renaming the 'time' column in each dataframe
+pcds_2_baca <- pcds_2_baca %>% rename(time_baca = time)
+pcds_2_blatchington <- pcds_2_blatchington %>% rename(time_blatchington = time)
+pcds_2_cardinal_n <- pcds_2_cardinal_n %>% rename(time_cardinal_n = time)
+pcds_2_ds <- pcds_2_ds %>% rename(time_ds = time)
+pcds_2_hove_park <- pcds_2_hove_park %>% rename(time_hove_park = time)
+pcds_2_kings <- pcds_2_kings %>% rename(time_kings = time)
+pcds_2_longhill <- pcds_2_longhill %>% rename(time_longhill = time)
+pcds_2_paca <- pcds_2_paca %>% rename(time_paca = time)
+pcds_2_patcham <- pcds_2_patcham %>% rename(time_patcham = time)
+pcds_2_varndean <- pcds_2_varndean %>% rename(time_varndean = time)
+
+# Merging all dataframes by 'id'
+bn_pcds_sch_travel <- pcds_2_baca %>%
+  full_join(pcds_2_blatchington, by = "id") %>%
+  full_join(pcds_2_cardinal_n, by = "id") %>%
+  full_join(pcds_2_ds, by = "id") %>%
+  full_join(pcds_2_hove_park, by = "id") %>%
+  full_join(pcds_2_kings, by = "id") %>%
+  full_join(pcds_2_longhill, by = "id") %>%
+  full_join(pcds_2_paca, by = "id") %>%
+  full_join(pcds_2_patcham, by = "id") %>%
+  full_join(pcds_2_varndean, by = "id")
+
+# Display the combined dataframe
+print(bn_pcds_sch_travel)
+
+```
+
+
+```{r}
+
+# Reshape the dataframe from wide to long format
+long_df <- bn_pcds_sch_travel %>%
+  pivot_longer(cols = starts_with("time_"), names_to = "school", values_to = "travel_time")
+
+# Find the columns with the smallest, second smallest, and third smallest values for each row
+closest_schools <- long_df %>%
+  group_by(id) %>%
+  arrange(travel_time) %>%
+  summarize(
+    first_closest_travel = first(school),
+    second_closest_travel = nth(school, 2),
+    third_closest_travel = nth(school, 3),
+    first_closest_time = first(travel_time),
+    second_closest_time = nth(travel_time, 2),
+    third_closest_time = nth(travel_time, 3),
+    max_travel = max(travel_time),
+    min_travel = min(travel_time),
+    avg_travel = mean(travel_time)
+  )
+
+# Remove 'time_' prefix from the values in the closest school columns
+closest_schools <- closest_schools %>%
+  mutate(
+    first_closest_travel = str_remove(first_closest_travel, "^time_"),
+    second_closest_travel = str_remove(second_closest_travel, "^time_"),
+    third_closest_travel = str_remove(third_closest_travel, "^time_")
+  )
+
+# Join the closest schools data back to the original dataframe
+bn_pcds_sch_travel <- bn_pcds_sch_travel %>%
+  left_join(closest_schools, by = "id")
+
+
+bn_pcds_sch_travel = inner_join(bn_pcds_r5r, bn_pcds_sch_travel, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+
+```
+
+
+```{r}
+
+library(RColorBrewer)
+
+tm_shape(bn_pcds_sch_travel) + 
+  tm_symbols(col = "first_closest_travel", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "Spectral", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+```
+
+```{r}
+library(RColorBrewer)
+
+tm_shape(bn_pcds_sch_travel) + 
+  tm_symbols(col = "second_closest_travel", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "Spectral", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+```
+
+```{r}
+
+library(RColorBrewer)
+
+tm_shape(bn_pcds_sch_travel) + 
+  tm_symbols(col = "first_closest_time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))+
+tm_shape(optionZ) +
+  tm_polygons(alpha = 0)
+
+```
+
+
+
+```{r}
+
+library(RColorBrewer)
+
+tm_shape(bn_pcds_sch_travel) + 
+  tm_symbols(col = "second_closest_time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))+
+tm_shape(optionZ) +
+  tm_polygons(alpha = 0)
+
+```
