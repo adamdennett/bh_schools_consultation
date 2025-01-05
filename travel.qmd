@@ -179,9 +179,14 @@ bn_postcode_centroids <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>%
 
 bn_filtered_postcodes <- bn_postcode_centroids[st_intersects(bn_postcode_centroids, brighton_outline_bng, sparse = FALSE), ]
 
+#dbWriteTable(con, name="bn_postcode_centroids", value=bn_filtered_postcodes, overwrite=TRUE)
+
 bn_filtered_postcodes_wgs <- st_transform(bn_filtered_postcodes, 4326)
 
 qtm(bn_filtered_postcodes_wgs)
+
+
+
 ```
 
 ```{r}
@@ -411,7 +416,6 @@ tm_shape(det) +
   tm_lines(col = "mode", palette = "-viridis", lwd = 2, alpha = 0.7, title.col = "Segment") 
 ```
 
-
 Travel Times to Varndean at 8:00 am on 1/12/22 from BN Postcodes
 
 ```{r}
@@ -524,8 +528,6 @@ tmap_mode("view")  # Set the mode to interactive viewing
 tm_shape(det) +
   tm_lines(col = "mode", palette = "-viridis", lwd = 2, alpha = 0.7, title.col = "Segment") 
 ```
-
-
 
 Travel Times to Dorothy Stringer at 8:00 am on 1/12/22 from BN Postcodes
 
@@ -783,7 +785,6 @@ rJava::.jgc(R.gc = TRUE)
 
 ```
 
-
 Travel Times to Hove Park School at 8:00 am on 1/12/22 from BN Postcodes
 
 ```{r}
@@ -847,7 +848,6 @@ r5r::stop_r5(r5r_core)
 rJava::.jgc(R.gc = TRUE)
 
 ```
-
 
 Travel Times to King's School at 8:00 am on 1/12/22 from BN Postcodes
 
@@ -913,7 +913,6 @@ rJava::.jgc(R.gc = TRUE)
 
 ```
 
-
 Travel Times to PACA at 8:00 am on 1/12/22 from BN Postcodes
 
 ```{r}
@@ -978,7 +977,6 @@ rJava::.jgc(R.gc = TRUE)
 
 ```
 
-
 Join everything together
 
 ```{r}
@@ -1011,7 +1009,6 @@ bn_pcds_sch_travel <- pcds_2_baca %>%
 print(bn_pcds_sch_travel)
 
 ```
-
 
 ```{r}
 
@@ -1052,9 +1049,9 @@ bn_pcds_sch_travel = inner_join(bn_pcds_r5r, bn_pcds_sch_travel, by="id") %>%
   st_as_sf(coords = c("lon", "lat")) %>% 
   st_set_crs(4326)
 
+#write_csv(bn_pcds_sch_travel, here("data", "bn_pcds_sch_travel.csv"))
 
 ```
-
 
 ```{r}
 
@@ -1096,8 +1093,6 @@ tm_shape(optionZ) +
 
 ```
 
-
-
 ```{r}
 
 library(RColorBrewer)
@@ -1112,3 +1107,70 @@ tm_shape(optionZ) +
   tm_polygons(alpha = 0)
 
 ```
+
+```{r}
+library(RColorBrewer)
+
+tm_shape(bn_pcds_sch_travel) + 
+  tm_symbols(col = "avg_travel", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))+
+tm_shape(optionZ) +
+  tm_polygons(alpha = 0)
+
+```
+
+```{r}
+
+ggplot(bn_pcds_sch_travel, aes(x = avg_travel)) +
+  geom_histogram(binwidth = 2, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Average Travel Times",
+       x = "Average Travel Time (minutes)",
+       y = "Frequency") +
+  theme_minimal()
+
+
+```
+
+```{r}
+# Load the ggplot2 library
+library(ggplot2)
+
+# Assuming your data is in a data frame called 'bn_pcds_sch_travel'
+# Create the layered histograms
+ggplot(bn_pcds_sch_travel) +
+  geom_histogram(aes(x = first_closest_time, fill = "First Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "black") +
+  geom_histogram(aes(x = second_closest_time, fill = "Second Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "black") +
+  geom_histogram(aes(x = third_closest_time, fill = "Third Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "black") +
+  labs(title = "Layered Histograms of Closest Travel Times",
+       x = "Travel Time (minutes)",
+       y = "Frequency") +
+  scale_fill_manual(name = "Travel Time", values = c("First Closest Time" = "skyblue", "Second Closest Time" = "lightgreen", "Third Closest Time" = "lightcoral")) +
+  theme_minimal()
+
+```
+
+
+```{r}
+# Load the ggplot2 library
+library(ggplot2)
+
+# Create the violin plots with median lines
+ggplot(bn_pcds_sch_travel) +
+  geom_violin(aes(x = "First Closest Time", y = first_closest_time, fill = "First Closest Time"), alpha = 0.5) +
+  geom_violin(aes(x = "Second Closest Time", y = second_closest_time, fill = "Second Closest Time"), alpha = 0.5) +
+  geom_violin(aes(x = "Third Closest Time", y = third_closest_time, fill = "Third Closest Time"), alpha = 0.5) +
+  stat_summary(aes(x = "First Closest Time", y = first_closest_time), fun = median, geom = "point", color = "white", size = 3, shape = 3, fill = "white") +
+  stat_summary(aes(x = "Second Closest Time", y = second_closest_time), fun = median, geom = "point", color = "white", size = 3, shape = 3, fill = "white") +
+  stat_summary(aes(x = "Third Closest Time", y = third_closest_time), fun = median, geom = "point", color = "white", size = 3, shape = 3, fill = "white") +
+  labs(title = "Violin Plots of Closest Travel Times with Median Lines",
+       x = "Travel Time Category",
+       y = "Travel Time (minutes)") +
+  scale_fill_manual(name = "Travel Time", values = c("First Closest Time" = "skyblue", "Second Closest Time" = "lightgreen", "Third Closest Time" = "lightcoral")) +
+  theme_minimal()
+
+
+```
+

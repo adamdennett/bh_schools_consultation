@@ -73,7 +73,7 @@ Travel Times to Longhill at 7:30 am on 1/12/22 from BN Postcodes
 
 rJava::.jinit()
 rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+options(java.parameters = "-Xmx60G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -85,7 +85,7 @@ bh_sec_sch1 <- bh_sec_sch %>%
 # Set parameters
 mode = c("CAR")
 max_walk_time = 60 # minutes
-max_trip_duration = 120 # minutes
+max_trip_duration = 90 # minutes
 departure_datetime = as.POSIXct("01-12-2022 7:30:00",
                                  format = "%d-%m-%Y %H:%M:%S")
   
@@ -133,7 +133,7 @@ rJava::.jgc(R.gc = TRUE)
 
 ```{r}
 # set inputs
-origins = bn_pcds_r5r 
+origins = bn_pcds_r5r %>% filter(id == "BN1 6PG") 
 destinations = bh_sec_sch1
 
 rJava::.jinit()
@@ -146,10 +146,10 @@ r5r_core <- setup_r5(data_path = data_path)
 
 #origins <- poi[10,]
 #destinations <- poi[12,]
-mode = c("CAR")
-max_walk_time = 60 # minutes
+mode = c("WALK", "TRANSIT")
+max_walk_time = 30 # minutes
 max_trip_duration = 120 # minutes
-departure_datetime = as.POSIXct("01-12-2022 8:30:00",
+departure_datetime = as.POSIXct("01-12-2022 7:30:00",
                                  format = "%d-%m-%Y %H:%M:%S")
 
 ##calc expanded ttm
@@ -173,6 +173,8 @@ det <- detailed_itineraries(r5r_core = r5r_core,
                             shortest_path = T)
 
 head(det)
+
+write_csv(det, here("data", "detail_itinerary_sample.csv"))
 
 tmap_mode("view")  # Set the mode to interactive viewing
 
