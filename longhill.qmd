@@ -1,0 +1,181 @@
+---
+title: "Longhill"
+author: "Adam Dennett"
+---
+
+Travel Times to Longhill at 7:30 am on 1/12/22 from BN Postcodes
+
+```{r}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114581")
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+
+# Set parameters
+mode = c("WALK", "Transit")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 7:30:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_longhill = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_longhill = aggregate(ttm_brighton_pcds_2_longhill$travel_time_p50, by=list(ttm_brighton_pcds_2_longhill$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_longhill <- rename(pcds_2_longhill, id = Group.1) 
+pcds_2_longhill <- rename(pcds_2_longhill, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_longhill = inner_join(bn_pcds_r5r, pcds_2_longhill, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_longhill$time <- as.numeric(pcds_geo_longhill$time)
+
+# Create a new column for conditional colors
+pcds_geo_longhill$color <- ifelse(pcds_geo_longhill$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_longhill) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+Travel Times to Longhill at 7:30 am on 1/12/22 from BN Postcodes
+
+```{r}
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114581")
+
+# Set parameters
+mode = c("CAR")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 7:30:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+# Calculate the travel time matrix by Transit
+ttm_brighton_pcds_2_longhill = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+# Find out the travel time to closest school
+pcds_2_longhill = aggregate(ttm_brighton_pcds_2_longhill$travel_time_p50, by=list(ttm_brighton_pcds_2_longhill$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_longhill <- rename(pcds_2_longhill, id = Group.1) 
+pcds_2_longhill <- rename(pcds_2_longhill, time = x)
+
+#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+
+pcds_geo_longhill = inner_join(bn_pcds_r5r, pcds_2_longhill, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
+
+# Ensure 'time' is numeric
+pcds_geo_longhill$time <- as.numeric(pcds_geo_longhill$time)
+
+# Create a new column for conditional colors
+pcds_geo_longhill$color <- ifelse(pcds_geo_longhill$time >= 75, "black", NA)
+
+tm_shape(pcds_geo_longhill) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+
+r5r::stop_r5(r5r_core)
+rJava::.jgc(R.gc = TRUE)
+
+```
+
+```{r}
+# set inputs
+origins = bn_pcds_r5r 
+destinations = bh_sec_sch1
+
+rJava::.jinit()
+rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+data_path = here("data", "r5rBrighton")
+r5r_core <- setup_r5(data_path = data_path)
+
+#origins <- poi[10,]
+#destinations <- poi[12,]
+mode = c("CAR")
+max_walk_time = 60 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 8:30:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+
+##calc expanded ttm
+ettm <- expanded_travel_time_matrix(r5r_core = r5r_core,
+                          origins = origins,
+                          destinations = destinations,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          breakdown = TRUE,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+
+# calculate detailed itineraries
+det <- detailed_itineraries(r5r_core = r5r_core,
+                            origins = origins,
+                            destinations = destinations,
+                            mode = mode,
+                            departure_datetime = departure_datetime,
+                            max_walk_time = max_walk_time,
+                            shortest_path = T)
+
+head(det)
+
+tmap_mode("view")  # Set the mode to interactive viewing
+
+tm_shape(det) +
+  tm_lines(col = "mode", palette = "-viridis", lwd = 2, alpha = 0.7, title.col = "Segment")
+```

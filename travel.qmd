@@ -344,7 +344,7 @@ pcds_geo_baca = inner_join(bn_pcds_r5r, pcds_2_baca, by="id") %>%
 #geo_hex_1 = inner_join(brighton_h3, pcds_closest_1, by="id")
 
 # Ensure 'time' is numeric
-pcds_geo_baca$time <- as.numeric(pcds_geo_BACA$time)
+pcds_geo_baca$time <- as.numeric(pcds_geo_baca$time)
 
 # Create a new column for conditional colors
 pcds_geo_baca$color <- ifelse(pcds_geo_baca$time >= 75, "black", NA)
