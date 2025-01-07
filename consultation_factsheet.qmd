@@ -1,7 +1,7 @@
 ---
 title: "Brighton and Hove Secondary Schools Consultation - Fact Sheet"
 author: "Adam Dennett"
-format: revealjs
+format: html
 ---
 
 
@@ -26,7 +26,7 @@ BHCC Premise - economic advantage/disadvantage are the main drivers of results i
 
 > BHCC School Admission Arrangements 2026-27 - 3.9 "Better equality of outcomes – results not driven by economic advantage."
 
-False. Economic advantage/disadvantage is not the main driver of results in the city. Persistent Absence is far more important
+False. Economic advantage/disadvantage is not the main driver at all of results in the city. More than that, for schools in England experiencing the same concentrations of disadvantage as those experienced in Brighton and Hove, there is NO RELATIONSHIP between variations in levels of disadvantage and levels of attainment or progress.  
 
 ## Fact 2 - Drivers of Attainment
 
