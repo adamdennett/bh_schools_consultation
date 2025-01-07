@@ -3,6 +3,7 @@ project:
   output-dir: docs
   render: 
     - absence.qmd
+    - attainment_extra.qmd
     - about.qmd
 
 website:
@@ -16,10 +17,11 @@ website:
     contents:
       - text: "About"
         href: about.qmd
-      - section: "Absence"
-        href: absence.qmd
-        contents:
-          - index.qmd
+      - section: "Analysis"
+        contents: 
+          - absence.qmd
+          - attainment_extra.qmd
+        
     tools:
       - icon: person-circle
         href: https://adamdennett.co.uk

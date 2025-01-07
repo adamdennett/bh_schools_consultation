@@ -1,0 +1,63 @@
+---
+title: "Brighton and Hove Secondary Schools Consultation - Fact Sheet"
+author: "Adam Dennett"
+format: revealjs
+---
+
+
+
+## Premise 1 - Attainment Gap
+
+BHCC Premise - Brighton and Hove has a problematic attainment gap that needs narrowing. It has below average attainment for disadvantaged students.
+
+False. Brighton and Hove's disadvantaged students already perform above the national average. 
+
+## Fact 1 - Attainment Gap
+
+In 2024, all students in Brighton and Hove - both disadvantaged and non-disadvantaged - achieved ***ABOVE*** the national (median) average when compared to other Local Authorities (both Upper and Lower Tier) in England. There is an attainment gap between disadvantaged and non-disadvantaged pupils in every Local Authority in England. Brighton's is an artifact of non-disadvantaged students doing far better than average.
+
+![](images/attainmentgap_95.png)
+
+<https://adamdennett.github.io/BH_Schools_2/stain_removal.html#disadvantaged-vs-non-disadvantaged-pupils>
+
+## Premise 2 - Drivers of Attainment
+
+BHCC Premise - economic advantage/disadvantage are the main drivers of results in the city
+
+> BHCC School Admission Arrangements 2026-27 - 3.9 "Better equality of outcomes – results not driven by economic advantage."
+
+False. Economic advantage/disadvantage is not the main driver of results in the city. Persistent Absence is far more important
+
+## Fact 2 - Drivers of Attainment
+
+## Premise - Geographic Spread of Schools
+
+BHCC Premise - Brighton and Hove needs to Maintain the Geographic Spread of secondary schools in the City
+
+> BHCC School Admission Arrangements 2026-27 - 3.9 "Maintaining the geographic spread of secondary schools in the city"
+
+False - The current geographic spread of schools relative to the city's population is in part causing the viability issues for one school which are then impacting other schools in the system
+
+## Fact
+
+Demand for schools varies significantly across the city. At the lower end, in the last 11-years, Longhill has received fewer ***total applications*** (1st, 2nd and 3rd choice combined) than its Published Admission Number (PAN) of 270. In-demand schools would normally expect considerably more *total applications* than places available as 2nd and 3rd choices are often allocated places elsewhere. For comparison, another single catchment school - Patcham High, has generally received around ***twice as many*** total applications than PAN.
+
+Over the last 11 years (since 2013), Longhill's total offers have trended down every year, and it has never achieved anywhere near 270 offers. It's peak was in 2014 when it made 209 offers. Last year it made 94 offers.
+
+
+![](images/yearly_offers_sml.png)
+
+<https://adamdennett.github.io/BH_Schools_2/schools_wk2.html#school-application-and-offer-history-across-brighton>
+
+## Premise - Social Mixing In Schools and Attainment
+
+BHCC Premise - Brighton and Hove's schools are not mixed enough and increasing mixing (by any means) will create better outcomes for disadvantaged pupils.
+
+> BHCC School Admission Arrangements 2026-27 - 3.9 "Deliver a ‘comprehensive’ offer from our city schools as a more mixed pupil intake creates better outcomes for disadvantaged pupils."
+
+## Fact
+
+Brighton and Hove's schools are already mixed with higher levels 
+
+## Premise - 
+

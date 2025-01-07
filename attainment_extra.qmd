@@ -1,0 +1,1216 @@
+---
+title: "Attainment Extras"
+author: "Professor Adam Dennett FRGS FAcSS, Professor of Urban Analytics, Bartlett Centre for Advanced Spatial Analysis, University College London - a.dennett@ucl.ac.uk"
+---
+
+# Summary
+
+The plots below recreate and extend the work that Ben Harper posted on Facebook [here](https://www.facebook.com/groups/brightonandhoveschoolcatchments/permalink/9017929404990608/).
+
+His work - taken alongside this other post [here](https://www.facebook.com/groups/brightonandhoveschoolcatchments/permalink/9028577260592489/) where the weakness of the Gorardian association between social mixing and attainment [first cited in this paper](https://journals.sagepub.com/doi/full/10.1177/2158244018825171) was demonstrated - was important as it provides strong evidence that for disadvantaged students (those who BHCC have identified as wanting to improve attainment for), no amount of increased or decreased social mixing in schools will make a difference to their progress or attainment at the end of KS4.
+
+Just to be clear. Using data from 2022-23 for all state secondary schools in England, for the range of disadvantage experienced in Brighton and Hove Schools (and we know that levels of disadvantage in the city are likely to increase overall from the Council's own projections), we find **NO RELATIONSHIP** between the increase or decrease in the total proportion of disadvantaged pupils in those schools and the increase or decrease or both Progress 8 and Attainment 8 scores. **NO RELATIONSHIP**.
+
+There is a weak negative relationship for non-disadvantaged students. This means that through a policy of increased social mixing - even before we try to account for the negative impacts of increased travel which will be used to facilitate the mixing - we can predict that the council might well be successful in reducing the attainment gap in the city, but only through reducing, slightly, the attainment of non-disadvantaged students in those schools where disadvantaged proportions increase. The gap won't be closed through increasing the attainment of disadvantaged students - this is likely to remain static.
+
+HOWEVER, it is a different story altogether when we look at persistent absence. If you had read my last piece [here](https://adamdennett.github.io/BH_Schools_Consultation/absence.html) you might already be guessing where this is going. Yes, there is a STONG RELATIONSHIP between persistent absence and attainment in the range Brighton and Hove experiences. It is closer to a linear relationship for Progress 8 anyway, but also holds for Attainment 8 which is not a linear relationship, but pretty linear for the Brighton and Hove range.
+
+I will therefore repeat what I said before: If Brighton and Hove Council are serious about wanting to improve the attainment of disadvantaged students in the city, they will not achieve this through changing the concentrations of disadvantage in the schools in the city - even if all schools had the 'city average' the evidence looking at all schools in England is there would be no benefit for disadvantaged pupils.
+
+Explore the plots below further for more information.
+
+```{r echo=T, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+
+```
+
+```{r echo=T, message=FALSE, warning=FALSE}
+
+##Absence 2022-23 regression analysis
+
+##All Data downloaded from here
+##https://www.compare-school-performance.service.gov.uk/
+
+#read in data for every school in the country
+
+england_abs <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_abs.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_census <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_census.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_ks4final <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_ks4final.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_school_information <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_school_information.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+
+england_ks4final <- england_ks4final %>%
+  mutate(URN = as.character(URN)) %>%
+  mutate(across(TOTPUPS:PTOTENT_E_COVID_IMPACTED_PTQ_EE, ~ parse_number(as.character(.))))
+
+england_ks4final <- england_ks4final %>%
+  filter(!is.na(URN))
+
+england_abs <- england_abs %>%
+  mutate(URN = as.character(URN))
+
+england_census <- england_census %>%
+  mutate(URN = as.character(URN))
+
+england_school_information <- england_school_information %>%
+  mutate(URN = as.character(URN))
+
+# Left join england_ks4final with england_abs
+england_school_2022_23 <- england_ks4final %>%
+  left_join(england_abs, by = "URN") %>%
+  left_join(england_census, by = "URN") %>%
+  left_join(england_school_information, by = "URN")
+
+data_types <- sapply(england_school_2022_23, class)
+england_school_2022_23_meta <- data.frame(Field = names(data_types), DataType = data_types)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#all england schools
+edubase_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>% 
+  mutate(urn = as.character(urn))
+
+#read in Brighton Secondary Schools Data
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700)
+
+btn_urn_list <- brighton_sec_schools %>% 
+  select(urn) 
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(ggrepel)
+
+btn_sub <- england_school_2022_23 %>%
+  filter(URN %in% btn_urn_list$urn)
+
+#P8_BANDING
+england_school_2022_23_not_special <- england_school_2022_23 %>%
+  filter(MINORGROUP != "Special school")
+
+eng_sch_2022_23_not_special_plus <- england_school_2022_23_not_special %>% left_join(
+  edubase_schools, by = join_by(URN == urn)
+)
+
+```
+
+# Disadvantage
+
+## Attainment 8
+
+### Attainment Non-Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(ATT8SCR_NFSM6CLA1A ~ PTFSM6CLA1A, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_NFSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_NFSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment 8 Non-Disadvantaged vs % School Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$ATT8SCR_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Attainment Non-Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit the linear model
+lm_model <- lm(ATT8SCR_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = ATT8SCR_NFSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_NFSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment Non-Disadvantaged 8 vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$ATT8SCR_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+```
+
+### Attainment Non-Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit linear models
+lm_before <- lm(ATT8SCR_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_before)
+lm_within <- lm(ATT8SCR_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_within)
+lm_after <- lm(ATT8SCR_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_NFSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_NFSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Attainment 8 Non-Disadvantaged vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "School % Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$ATT8SCR_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 0, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$ATT8SCR_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H FSM Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$ATT8SCR_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3)
+
+```
+
+### Attainment Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(ATT8SCR_FSM6CLA1A ~ PTFSM6CLA1A, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_FSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_FSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment 8 Disadvantaged vs % School Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$ATT8SCR_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Attainment Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit the linear model
+lm_model <- lm(ATT8SCR_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = ATT8SCR_FSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_FSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment Disadvantaged 8 vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$ATT8SCR_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+```
+
+### Attainment Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit linear models
+lm_before <- lm(ATT8SCR_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_before)
+lm_within <- lm(ATT8SCR_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_within)
+lm_after <- lm(ATT8SCR_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_FSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_FSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Attainment 8 Disadvantaged vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "School % Percentage of Disadvantaged Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H FSM Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.75, vjust = -3, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = -2.5, size = 3)
+
+```
+
+## Progress 8
+
+### Progress Non-Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(P8MEA_NFSM6CLA1A ~ PTFSM6CLA1A, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_NFSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_NFSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Non-Disadvantaged vs % School Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$P8MEA_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Progress Non-Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit the linear model
+lm_model <- lm(P8MEA_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = P8MEA_NFSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_NFSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Non-Disadvantaged vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$P8MEA_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+```
+
+### Progress Non-Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit linear models
+lm_before <- lm(P8MEA_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_before)
+lm_within <- lm(P8MEA_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_within)
+lm_after <- lm(P8MEA_NFSM6CLA1A ~ PTFSM6CLA1A, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_NFSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_NFSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Progress 8 Non-Disadvantaged vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "School % Percentage of Disadvantaged Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$P8MEA_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 0, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$P8MEA_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H FSM Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$P8MEA_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3)
+
+```
+
+### Progress Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(P8MEA_FSM6CLA1A ~ PTFSM6CLA1A, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_FSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_FSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Disadvantaged vs % School Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$P8MEA_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Progress Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit the linear model
+lm_model <- lm(P8MEA_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = P8MEA_FSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_FSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Disadvantaged vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "% Percentage of Disadvantaged Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$P8MEA_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 0.5, vjust = -1, size = 3)
+
+
+```
+
+### Progress Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+max_value <- max(btn_sub$PTFSM6CLA1A, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PTFSM6CLA1A >= min_value & PTFSM6CLA1A <= max_value)
+
+# Fit linear models
+lm_before <- lm(P8MEA_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_before)
+lm_within <- lm(P8MEA_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_within)
+lm_after <- lm(P8MEA_FSM6CLA1A ~ PTFSM6CLA1A, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_FSM6CLA1A, x = PTFSM6CLA1A)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_FSM6CLA1A, x = PTFSM6CLA1A, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Progress 8 Disadvantaged vs % Percentage of \nDisadvantaged Students, 2022-23",
+       x = "School % Percentage of Disadvantaged Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$P8MEA_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$P8MEA_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H FSM Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.5, vjust = 0.5, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$P8MEA_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3)
+
+```
+
+# Persistent Absence
+
+## Attainment 8
+
+### Attainment Non-Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(ATT8SCR_NFSM6CLA1A ~ PPERSABS10, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_NFSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_NFSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment 8 Non-Disadvantaged vs % School Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$ATT8SCR_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Attainment Non-Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit the linear model
+lm_model <- lm(ATT8SCR_NFSM6CLA1A ~ PPERSABS10, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = ATT8SCR_NFSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_NFSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment Non-Disadvantaged 8 vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$ATT8SCR_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+```
+
+### Attainment Non-Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit linear models
+lm_before <- lm(ATT8SCR_NFSM6CLA1A ~ PPERSABS10, data = subset_before)
+lm_within <- lm(ATT8SCR_NFSM6CLA1A ~ PPERSABS10, data = subset_within)
+lm_after <- lm(ATT8SCR_NFSM6CLA1A ~ PPERSABS10, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_NFSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_NFSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Attainment 8 Non-Disadvantaged vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "School % Percentage of Persistently Absent Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$ATT8SCR_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 0, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$ATT8SCR_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H P-Abs Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$ATT8SCR_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3)
+
+```
+
+### Attainment Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(ATT8SCR_FSM6CLA1A ~ PPERSABS10, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_FSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_FSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment 8 Disadvantaged vs % School Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$ATT8SCR_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Attainment Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit the linear model
+lm_model <- lm(ATT8SCR_FSM6CLA1A ~ PPERSABS10, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = ATT8SCR_FSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_FSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment Disadvantaged 8 vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$ATT8SCR_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+```
+
+### Attainment Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit linear models
+lm_before <- lm(ATT8SCR_FSM6CLA1A ~ PPERSABS10, data = subset_before)
+lm_within <- lm(ATT8SCR_FSM6CLA1A ~ PPERSABS10, data = subset_within)
+lm_after <- lm(ATT8SCR_FSM6CLA1A ~ PPERSABS10, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR_FSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = ATT8SCR_FSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Attainment 8 Disadvantaged vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "School % Percentage of Persistently Absent Students",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H P-Abs Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.5, vjust = -3, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$ATT8SCR_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = -2.5, size = 3)
+
+```
+
+## Progress 8
+
+### Progress Non-Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(P8MEA_NFSM6CLA1A ~ PPERSABS10, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_NFSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_NFSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Non-Disadvantaged vs % School Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$P8MEA_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Progress Non-Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit the linear model
+lm_model <- lm(P8MEA_NFSM6CLA1A ~ PPERSABS10, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = P8MEA_NFSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_NFSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Non-Disadvantaged vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$P8MEA_NFSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+```
+
+### Progress Non-Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit linear models
+lm_before <- lm(P8MEA_NFSM6CLA1A ~ PPERSABS10, data = subset_before)
+lm_within <- lm(P8MEA_NFSM6CLA1A ~ PPERSABS10, data = subset_within)
+lm_after <- lm(P8MEA_NFSM6CLA1A ~ PPERSABS10, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_NFSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_NFSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Progress 8 Non-Disadvantaged vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "School % Percentage of Persistently Absent Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$P8MEA_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$P8MEA_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H P-Abs Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$P8MEA_NFSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3)
+
+```
+
+### Progress Disadvantaged All
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(P8MEA_FSM6CLA1A ~ PPERSABS10, data = england_school_2022_23_not_special)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_FSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_FSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Disadvantaged vs % School Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(england_school_2022_23_not_special$P8MEA_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 1, vjust = 0, size = 3)
+
+
+
+```
+
+### Progress Disadvantaged B&H Range
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create the subset
+subset_data <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit the linear model
+lm_model <- lm(P8MEA_FSM6CLA1A ~ PPERSABS10, data = subset_data)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+# Plot the data with a linear regression line and annotation
+ggplot(subset_data, aes(y = P8MEA_FSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_FSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Progress 8 Disadvantaged vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "% Percentage of Persistently Absent Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = 80, y = min(subset_data$P8MEA_FSM6CLA1A, na.rm = TRUE), 
+           label = annotation_text, hjust = 0.5, vjust = -1, size = 3)
+
+
+```
+
+### Progress Disadvantaged Mixed Ranges
+
+```{r echo=T, message=FALSE, warning=FALSE}
+# Calculate the min and max values for the subset range
+min_value <- min(btn_sub$PPERSABS10, na.rm = TRUE)
+max_value <- max(btn_sub$PPERSABS10, na.rm = TRUE)
+
+# Create subsets
+subset_before <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 < min_value)
+
+subset_after <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 > max_value)
+
+subset_within <- england_school_2022_23_not_special %>%
+  filter(PPERSABS10 >= min_value & PPERSABS10 <= max_value)
+
+# Fit linear models
+lm_before <- lm(P8MEA_FSM6CLA1A ~ PPERSABS10, data = subset_before)
+lm_within <- lm(P8MEA_FSM6CLA1A ~ PPERSABS10, data = subset_within)
+lm_after <- lm(P8MEA_FSM6CLA1A ~ PPERSABS10, data = subset_after)
+
+# Calculate middle x positions for annotations
+middle_before <- mean(c(0, min_value))
+middle_within <- mean(c(min_value, max_value))
+middle_after <- mean(c(max_value, 100))
+
+# Plot the data with annotations
+ggplot(england_school_2022_23_not_special, aes(y = P8MEA_FSM6CLA1A, x = PPERSABS10)) +
+  geom_point() +
+  geom_point(data = btn_sub, aes(y = P8MEA_FSM6CLA1A, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(data = subset_before, method = "lm", se = TRUE, color = "red", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_within, method = "lm", se = TRUE, color = "green", linetype = "solid", aes(group = 1)) +
+  geom_smooth(data = subset_after, method = "lm", se = TRUE, color = "purple", linetype = "solid", aes(group = 1)) +
+  labs(title = "Progress 8 Disadvantaged vs % Percentage of \nPersistently Absent Students, 2022-23",
+       x = "School % Percentage of Persistently Absent Students",
+       y = "Progress 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() +
+  xlim(0, 100) +
+  annotate("text", x = middle_before, y = min(subset_before$P8MEA_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Lower B&H\nSlope:", round(coef(lm_before)[2], 2),
+                         "\nIntercept:", round(coef(lm_before)[1], 2),
+                         "\nR-squared:", round(summary(lm_before)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3) +
+  annotate("text", x = middle_within, y = min(subset_within$P8MEA_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("B&H P-Abs Range\nSlope:", round(coef(lm_within)[2], 2),
+                         "\nIntercept:", round(coef(lm_within)[1], 2),
+                         "\nR-squared:", round(summary(lm_within)$r.squared, 2)), 
+           hjust = 0.5, vjust = 0.5, size = 3) +
+  annotate("text", x = middle_after, y = min(subset_after$P8MEA_FSM6CLA1A, na.rm = TRUE) + 5, 
+           label = paste("Higher B&H\nSlope:", round(coef(lm_after)[2], 2),
+                         "\nIntercept:", round(coef(lm_after)[1], 2),
+                         "\nR-squared:", round(summary(lm_after)$r.squared, 2)), 
+           hjust = 0.5, vjust = 1, size = 3)
+
+```
