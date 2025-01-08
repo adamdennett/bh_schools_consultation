@@ -1,0 +1,117 @@
+---
+title: "Gorard Segregation Index"
+author: "Adam Dennett"
+---
+
+A few scripts to calculate the Gorard Segregation Index - detailed here <https://sru.soc.surrey.ac.uk/SRU30.html> - using 2022-23 DfE data.
+
+```{r echo=T, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+
+```
+
+```{r echo=T, message=FALSE, warning=FALSE}
+
+##Absence 2022-23 regression analysis
+
+##All Data downloaded from here
+##https://www.compare-school-performance.service.gov.uk/
+
+#read in data for every school in the country
+
+england_abs <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_abs.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_census <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_census.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_ks4final <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_ks4final.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_school_information <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_school_information.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+
+england_ks4final <- england_ks4final %>%
+  mutate(URN = as.character(URN)) %>%
+  mutate(across(TOTPUPS:PTOTENT_E_COVID_IMPACTED_PTQ_EE, ~ parse_number(as.character(.))))
+
+england_ks4final <- england_ks4final %>%
+  filter(!is.na(URN))
+
+england_abs <- england_abs %>%
+  mutate(URN = as.character(URN))
+
+england_census <- england_census %>%
+  mutate(URN = as.character(URN))
+
+england_school_information <- england_school_information %>%
+  mutate(URN = as.character(URN))
+
+# Left join england_ks4final with england_abs
+england_school_2022_23 <- england_ks4final %>%
+  left_join(england_abs, by = "URN") %>%
+  left_join(england_census, by = "URN") %>%
+  left_join(england_school_information, by = "URN")
+
+data_types <- sapply(england_school_2022_23, class)
+england_school_2022_23_meta <- data.frame(Field = names(data_types), DataType = data_types)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#all england schools
+edubase_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>% 
+  mutate(urn = as.character(urn))
+
+#read in Brighton Secondary Schools Data
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700)
+
+btn_urn_list <- brighton_sec_schools %>% 
+  select(urn) 
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(ggrepel)
+
+btn_sub <- england_school_2022_23 %>%
+  filter(URN %in% btn_urn_list$urn)
+
+#P8_BANDING
+england_school_2022_23_not_special <- england_school_2022_23 %>%
+  filter(MINORGROUP != "Special school")
+
+eng_sch_2022_23_not_special_plus <- england_school_2022_23_not_special %>% left_join(
+  edubase_schools, by = join_by(URN == urn)
+)
+
+```
+
+### Index of Dissimilarity
+
+$$
+D = 0.5* \sum {(A_i / X) \over (B_i / Y)}
+$$
+
+Where
+
+$$
+X = \sum A_i
+$$
+
+$$
+Y = \sum B_i
+$$
+
+
+```{r}
+
+
+
+```

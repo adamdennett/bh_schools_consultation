@@ -548,7 +548,7 @@ btn_sub <- england_school_2022_23 %>%
 
 #P8_BANDING
 england_school_2022_23_not_special <- england_school_2022_23 %>%
-  filter(MINORGROUP != "Special school")
+  filter(MINORGROUP != "Special school" & ADMPOL.x == "NSE")
 
 eng_sch_2022_23_not_special_plus <- england_school_2022_23_not_special %>% left_join(
   edubase_schools, by = join_by(URN == urn)
@@ -871,7 +871,7 @@ library(mgcv)
 ggplot(england_school_2022_23_not_special, aes(y = ATT8SCR, x = PPERSABS10)) +
   geom_point() +
   #geom_smooth(method = "gam", se = TRUE) +
-  geom_smooth(method = "lm", formula = y ~ exp(-0.05*x), se = TRUE, colour = "red") + geom_point(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10, colour = OFSTEDRATING)) +
+  geom_smooth(method = "lm", se = TRUE, colour = "red") + geom_point(data = btn_sub, aes(y = ATT8SCR, x = PPERSABS10, colour = OFSTEDRATING)) +
   labs(title = "Attainment 8 vs Persistent Absence %, all schools in England, 2022-23",
        x = "% Enrollments who are persistently absent",
        y = "Attainment 8 measure",
@@ -1593,13 +1593,13 @@ plot_summs(model, plot.distributions = TRUE, inner_ci_level = .9, scale = TRUE)
 
     -   Ofsted ratings - relative to "Good" (which is set to zero).
 
--   All variables are statistically significant and the model has an $R^2$ of 0.57, meaning the variables included explain 57% of the variance in Progress 8 Score across schools in England. This is a good model with strong predictive power.
+-   All variables are statistically significant and the model has an $R^2$ of 0.55, meaning the variables included explain 57% of the variance in Progress 8 Score across schools in England. This is a good model with strong predictive power.
 
 -   Standardised t-values indicate which variables are having the most influence on explaining that variation in Progress 8.
 
-    -   Persistent Absence - PPRESABS10 - is the most important variable in the model with a negative t-value of -30.89 (Progress 8 goes down as absence goes up). The next most important is Ofsted-Outstanding with a positive t-value of 20.10 (being in an outstanding school pushes Progress 8 up). The next most important is Ofsted - requires improvement, which has a negative t-value of -12.20.
+    -   Persistent Absence - PPRESABS10 - is the most important variable in the model with a negative t-value of -28.11 (Progress 8 goes down as absence goes up). The next most important is Ofsted-Outstanding with a positive t-value of 18.69 (being in an outstanding school pushes Progress 8 up). The next most important is Ofsted - requires improvement, which has a negative t-value of -11.55.
 
-    -   The overall % of disadvantaged students has a negative effect as we would expect, but it is a comparatively small effect compared to these other variables, with a t-value of only -6.99.
+    -   The overall % of disadvantaged students has a negative effect as we would expect, but it is a comparatively small effect compared to these other variables, with a t-value of only -5.48.
 
 -   The standardised plot below the tabular output give a visual representation of this overall pattern. Here the coefficients have been scaled so they are not the t-values, but the broad patterns are the same and are perhaps more intuitive to interpret.
 
@@ -1658,7 +1658,7 @@ ggplot(filtered_region, aes(x = PPERSABS10)) +
 
 -   Model 2 is essentially the same as Model 1, but this time incorporates a further 'region' variable.
 
--   The model fit is better - we are now explaining 60% of the variation in Progress 8 scores with the variables we have chosen. We can, of course, keep building this model and adding additional variables in. For now, as we have explained most of the variance in the model, we will not keep going. In future weeks, I may go further, however.
+-   The model fit is better - we are now explaining 58% of the variation in Progress 8 scores with the variables we have chosen. We can, of course, keep building this model and adding additional variables in. For now, as we have explained most of the variance in the model, we will not keep going. In future weeks, I may go further, however.
 
 -   Where we have p-values of \>0.05, these variables are statistically insignificant, so we can ignore their parameters - they are not influencing the model. This is the case for a lot of the regions, however, London sticks out as it is both statistically significant and positive on its effect on attainment. This aligns with observations we have made in previous weeks about the importance of London in England's education story.
 
@@ -1678,7 +1678,7 @@ ggplot(filtered_region, aes(x = PPERSABS10)) +
 
     -   Nearly all other schools in the city are doing better than the model would have predicted with positive residuals. This shows that despite the challenges faced by most Brighton schools, they are doing well relative to the factors that might otherwise hinder their progress.
 
-#### Results - Model 13: Progress 8 \~ % Persistent Absense + % Disadvantage - Brighton Only
+#### Results - Model 3: Progress 8 \~ % Persistent Absense + % Disadvantage - Brighton Only
 
 ```{r}
 model3 <- lm(P8MEA ~ PPERSABS10 + PTFSM6CLA1A, data = btn_sub)

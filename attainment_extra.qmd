@@ -163,7 +163,7 @@ btn_sub <- england_school_2022_23 %>%
 
 #P8_BANDING
 england_school_2022_23_not_special <- england_school_2022_23 %>%
-  filter(MINORGROUP != "Special school")
+  filter(MINORGROUP != "Special school" & ADMPOL.x == "NSE")
 
 eng_sch_2022_23_not_special_plus <- england_school_2022_23_not_special %>% left_join(
   edubase_schools, by = join_by(URN == urn)

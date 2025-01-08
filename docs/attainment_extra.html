@@ -2364,7 +2364,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb27-163"><a href="#cb27-163" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-164"><a href="#cb27-164" aria-hidden="true" tabindex="-1"></a><span class="in">#P8_BANDING</span></span>
 <span id="cb27-165"><a href="#cb27-165" aria-hidden="true" tabindex="-1"></a><span class="in">england_school_2022_23_not_special &lt;- england_school_2022_23 %&gt;%</span></span>
-<span id="cb27-166"><a href="#cb27-166" aria-hidden="true" tabindex="-1"></a><span class="in">  filter(MINORGROUP != "Special school")</span></span>
+<span id="cb27-166"><a href="#cb27-166" aria-hidden="true" tabindex="-1"></a><span class="in">  filter(MINORGROUP != "Special school" &amp; ADMPOL.x == "NSE")</span></span>
 <span id="cb27-167"><a href="#cb27-167" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-168"><a href="#cb27-168" aria-hidden="true" tabindex="-1"></a><span class="in">eng_sch_2022_23_not_special_plus &lt;- england_school_2022_23_not_special %&gt;% left_join(</span></span>
 <span id="cb27-169"><a href="#cb27-169" aria-hidden="true" tabindex="-1"></a><span class="in">  edubase_schools, by = join_by(URN == urn)</span></span>
