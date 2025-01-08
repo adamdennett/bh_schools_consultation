@@ -33,7 +33,7 @@ library(RPostgres)
 library(rpostgis)
 ```
 
-```{r Connect-to-Database}
+```{r Connect-to-Database warning=FALSE, message=FALSE, echo=FALSE}
 #connect to a local database to store some data later on
 con <- dbConnect(RPostgres::Postgres(), 
                  dbname = 'gisdb2',
@@ -59,15 +59,16 @@ data_path = here("data", "r5rBrighton")
 #list.files(data_path)
 rJavaEnv::java_check_version_rjava()
 # Allow 30 GiB of memory
+options(java.parameters = "-Xmx30G")
 rJava::.jinit()
 rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+
 
 r5r_core <- setup_r5(data_path = data_path)
 
 ```
 
-```{r osm-download}
+```{r osm-download warning=FALSE, message=FALSE, echo=FALSE}
 #get some output areas
 brighton_oa <- st_read(here("data","oa_brighton.geojson"))
 #get some roads
@@ -103,13 +104,13 @@ tm_shape(brighton_roads) +
 
 ```
 
-```{r write-to-database}
+```{r write-to-database warning=FALSE, message=FALSE, echo=FALSE}
 #write Brighton Roads back into postgres for some routing stuff later on
 dbWriteTable(con, name="brighton_roads", value=brighton_roads, overwrite=TRUE)
 
 ```
 
-```{r get-schools-info}
+```{r get-schools-info warning=FALSE, message=FALSE, echo=FALSE}
 #Fix the school and school data so r5 can handle it
 #schools first
 
@@ -136,7 +137,7 @@ dbWriteTable(con, name="brighton_sec_schools", value=brighton_sec_schools, overw
 
 ```
 
-```{r, h3-setup warning=FALSE, message=FALSE, echo=FALSE}
+```{r, h3-setup warning=FALSE, message=FALSE, echo=FALSE, results='hide'}
 #visualise the spatial data
 brighton_outline <- st_union(brighton_oa) %>% st_transform(4326)
 brighton_outline_wgs <- st_union(brighton_oa) %>% st_transform(4326)
@@ -157,7 +158,7 @@ qtm(brighton_h3, alpha = 0.5)
 
 ```
 
-```{r get-postcodes}
+```{r get-postcodes echo=F, eval=TRUE, results='hide'}
 con <- dbConnect(RPostgres::Postgres(), 
                  dbname = 'gisdb2',
                  host = 'localhost',
@@ -189,7 +190,7 @@ qtm(bn_filtered_postcodes_wgs)
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 #get postcode centroids as origins
 bn_pcds_r5r <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>% 
   filter(oslaua == "E06000043") %>%
@@ -221,13 +222,14 @@ optionZ <- st_read(here("data","optionZa.geojson"))
 
 Travel Times to Longhill at 7:30 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114581")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -278,12 +280,12 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 library(tmap)
 # Ensure 'time' is numeric
 pcds_geo_longhill$time <- as.numeric(pcds_geo_longhill$time)
@@ -305,13 +307,13 @@ tm_shape(optionZ) +
 
 Travel Times to BACA at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "136164")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -362,19 +364,19 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 # set inputs
 origins = bh_sec_sch1
 destinations = bn_pcds_r5r %>% filter(id == "BN1 6PG")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -418,13 +420,13 @@ tm_shape(det) +
 
 Travel Times to Varndean at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114579")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -475,19 +477,19 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 # set inputs
 origins = bh_sec_sch1
 destinations = bn_pcds_r5r %>% filter(id == "BN2 5RS")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -531,13 +533,13 @@ tm_shape(det) +
 
 Travel Times to Dorothy Stringer at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114580")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -588,20 +590,20 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
 Travel Times to Patcham School at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114608")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -652,20 +654,20 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
 Travel Times to Cardinal Newman School at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114611")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -716,20 +718,20 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
 Travel Times to Blatchington Mill School at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114606")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -780,20 +782,20 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
 Travel Times to Hove Park School at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114607")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -844,20 +846,20 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
 Travel Times to King's School at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "139409")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -908,20 +910,20 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
 Travel Times to PACA at 8:00 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "137063")
 
-rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
-options(java.parameters = "-Xmx30G")
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
 
 #data_path = here("data")
 data_path = here("data", "r5rBrighton")
@@ -972,14 +974,14 @@ tm_shape(bh_sec_sch1) +
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
-r5r::stop_r5(r5r_core)
-rJava::.jgc(R.gc = TRUE)
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
 
 ```
 
 Join everything together
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 
 # Renaming the 'time' column in each dataframe
 pcds_2_baca <- pcds_2_baca %>% rename(time_baca = time)
@@ -1010,7 +1012,7 @@ print(bn_pcds_sch_travel)
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 
 # Reshape the dataframe from wide to long format
 long_df <- bn_pcds_sch_travel %>%
@@ -1053,39 +1055,39 @@ bn_pcds_sch_travel = inner_join(bn_pcds_r5r, bn_pcds_sch_travel, by="id") %>%
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 
 library(RColorBrewer)
 
 tm_shape(bn_pcds_sch_travel) + 
   tm_symbols(col = "first_closest_travel", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "Spectral", alpha = 0.3) + 
   tm_layout(legend.title.size = 1.5) +
-tm_shape(bh_sec_sch1) +
+tm_shape(bh_sec_sch) +
   tm_dots(col = "black", border.lwd = 0) + 
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 library(RColorBrewer)
 
 tm_shape(bn_pcds_sch_travel) + 
   tm_symbols(col = "second_closest_travel", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "Spectral", alpha = 0.3) + 
   tm_layout(legend.title.size = 1.5) +
-tm_shape(bh_sec_sch1) +
+tm_shape(bh_sec_sch) +
   tm_dots(col = "black", border.lwd = 0) + 
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 
 library(RColorBrewer)
 
 tm_shape(bn_pcds_sch_travel) + 
   tm_symbols(col = "first_closest_time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
   tm_layout(legend.title.size = 1.5) +
-tm_shape(bh_sec_sch1) +
+tm_shape(bh_sec_sch) +
   tm_dots(col = "black", border.lwd = 0) + 
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))+
 tm_shape(optionZ) +
@@ -1093,14 +1095,14 @@ tm_shape(optionZ) +
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 
 library(RColorBrewer)
 
 tm_shape(bn_pcds_sch_travel) + 
   tm_symbols(col = "second_closest_time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
   tm_layout(legend.title.size = 1.5) +
-tm_shape(bh_sec_sch1) +
+tm_shape(bh_sec_sch) +
   tm_dots(col = "black", border.lwd = 0) + 
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))+
 tm_shape(optionZ) +
@@ -1108,13 +1110,13 @@ tm_shape(optionZ) +
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 library(RColorBrewer)
 
 tm_shape(bn_pcds_sch_travel) + 
   tm_symbols(col = "avg_travel", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
   tm_layout(legend.title.size = 1.5) +
-tm_shape(bh_sec_sch1) +
+tm_shape(bh_sec_sch) +
   tm_dots(col = "black", border.lwd = 0) + 
   tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))+
 tm_shape(optionZ) +
@@ -1122,10 +1124,10 @@ tm_shape(optionZ) +
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 
 ggplot(bn_pcds_sch_travel, aes(x = avg_travel)) +
-  geom_histogram(binwidth = 2, fill = "skyblue", color = "black") +
+  geom_histogram(binwidth = 2, fill = "skyblue", colour = "grey", alpha = 0.5) +
   labs(title = "Histogram of Average Travel Times",
        x = "Average Travel Time (minutes)",
        y = "Frequency") +
@@ -1134,16 +1136,16 @@ ggplot(bn_pcds_sch_travel, aes(x = avg_travel)) +
 
 ```
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 # Load the ggplot2 library
 library(ggplot2)
 
 # Assuming your data is in a data frame called 'bn_pcds_sch_travel'
 # Create the layered histograms
 ggplot(bn_pcds_sch_travel) +
-  geom_histogram(aes(x = first_closest_time, fill = "First Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "black") +
-  geom_histogram(aes(x = second_closest_time, fill = "Second Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "black") +
-  geom_histogram(aes(x = third_closest_time, fill = "Third Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "black") +
+  geom_histogram(aes(x = first_closest_time, fill = "First Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "grey") +
+  geom_histogram(aes(x = second_closest_time, fill = "Second Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "grey") +
+  geom_histogram(aes(x = third_closest_time, fill = "Third Closest Time"), binwidth = 2, alpha = 0.5, position = "identity", color = "grey") +
   labs(title = "Layered Histograms of Closest Travel Times",
        x = "Travel Time (minutes)",
        y = "Frequency") +
@@ -1153,7 +1155,7 @@ ggplot(bn_pcds_sch_travel) +
 ```
 
 
-```{r}
+```{r warning=FALSE, message=FALSE, echo=FALSE}
 # Load the ggplot2 library
 library(ggplot2)
 
