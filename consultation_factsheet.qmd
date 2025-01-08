@@ -86,7 +86,7 @@ BHCC Premise - Brighton and Hove's schools are not mixed enough and increasing m
 
 **Conflicting evidence**, but Brighton specific analysis suggests increasing mixing will not benefit disadvantaged students in the city.
 
-## Fact
+## Fact 4
 
 Brighton and Hove's schools are already very mixed (relative to other LEAs in England) according to the relative proportions of disadvantaged and non-disadvantaged pupils across state secondary schools in the whole city.
 
@@ -96,4 +96,12 @@ The plot below shows where Brighton sits relative to other LEAs in England on bo
 
 ![](images/segregation_plot.png)
 
-## Premise -
+## Premise 5 - Greater Access to a Range of Schools
+
+Choice
+
+## Fact 5 
+
+## Premise 6 - Fairness
+
+## Premise 7 - Academic Evidence to Support the Council's Approach
