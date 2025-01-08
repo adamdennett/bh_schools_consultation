@@ -28,7 +28,7 @@ BHCC Premise - economic advantage/disadvantage are the main drivers of results i
 
 > BHCC School Admission Arrangements 2026-27 - 3.9 "Better equality of outcomes – results not driven by economic advantage."
 
-**False.**
+**False**
 
 Economic advantage/disadvantage is not the main driver at all of results in the city. Or in the rest of the country for that matter.
 
@@ -50,15 +50,15 @@ Far more important as a driver of attainment in Brighton (and in other secondary
 
 ## Premise 3 - Geographic Spread of Schools
 
-BHCC Premise - Brighton and Hove needs to Maintain the Geographic Spread of secondary schools in the City
+BHCC Premise - Brighton and Hove should maintain the geographic spread of secondary schools in the city
 
 > BHCC School Admission Arrangements 2026-27 - 3.9 "Maintaining the geographic spread of secondary schools in the city"
 
-False
+**Debatable**
 
-The current geographic spread of schools relative to the city's population is in part causing the viability issues for one school which are then impacting other schools in the system.
+This is a party political desire to keep the current configuration of schools. The current geographic spread of schools relative to the city's population is in part causing the viability issues for one school which are then impacting other schools in the system.
 
-## Fact
+## Fact 3
 
 Demand for schools varies significantly across the city. At the lower end, in the last 11-years, Longhill has received fewer ***total applications*** (1st, 2nd and 3rd choice combined) than its Published Admission Number (PAN) of 270. In-demand schools would normally expect considerably more *total applications* than places available as 2nd and 3rd choices are often allocated places elsewhere. For comparison, another single catchment school - Patcham High, has generally received around ***twice as many*** total applications than PAN.
 
@@ -72,15 +72,19 @@ Longhill's challenges are multiple, but two stick out:
 
 -   it is geographically remote
 
--   as a school with the capacity to admit 270 pupils a year, its site is far too large relative to the numbers of students it is likely to attract
+-   as a school with the capacity to admit 270 pupils a year, its site is far too large relative to the numbers of students it has attracted in recent years and will likely attract in the future if the trend continues the 10 year trajectory.
 
 ![](images/map_11_year_olds_2024.png)
 
-## Premise - Social Mixing in Schools and Attainment
+Modelling I [carried out here](https://adamdennett.github.io/BH_Schools_2/schools_wk3.html) suggests that if Longhill were moved further west to somewhere near the Race Course, it would be far more attractive to students - all other things being equal.
+
+## Premise 4 - Social Mixing in Schools and Attainment
 
 BHCC Premise - Brighton and Hove's schools are not mixed enough and increasing mixing (by any means) will create better outcomes for disadvantaged pupils.
 
 > BHCC School Admission Arrangements 2026-27 - 3.9 "Deliver a ‘comprehensive’ offer from our city schools as a more mixed pupil intake creates better outcomes for disadvantaged pupils."
+
+**Conflicting evidence**, but Brighton specific analysis suggests increasing mixing will not benefit disadvantaged students in the city.
 
 ## Fact
 
