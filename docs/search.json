@@ -455,5 +455,269 @@
       "Analysis",
       "Attainment Extras"
     ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-1---attainment-gap",
+    "href": "consultation_factsheet.html#premise-1---attainment-gap",
+    "title": "Fact-Sheet",
+    "section": "Premise 1 - Attainment Gap",
+    "text": "Premise 1 - Attainment Gap\nBHCC Premise - Brighton and Hove has an attainment gap that needs narrowing. It has below average attainment for disadvantaged students.\nOn attainment of disadvantaged students - False. On the gap - True, it exists and is relatively large, but because non-disadvantaged students are very high achievers.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-1---attainment-gap",
+    "href": "consultation_factsheet.html#fact-1---attainment-gap",
+    "title": "Fact-Sheet",
+    "section": "Fact 1 - Attainment Gap",
+    "text": "Fact 1 - Attainment Gap\nIn 2024, all students in Brighton and Hove - both disadvantaged and non-disadvantaged - achieved ABOVE the national (median) average when compared to other Local Education Authorities in England.\nThere is an attainment gap between disadvantaged and non-disadvantaged pupils in every Local Authority in England. Brighton’s is relatively large in absolute terms but is an artifact of non-disadvantaged students doing far better than average.\n\nhttps://adamdennett.github.io/BH_Schools_2/stain_removal.html#disadvantaged-vs-non-disadvantaged-pupils",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-2---drivers-of-attainment",
+    "href": "consultation_factsheet.html#premise-2---drivers-of-attainment",
+    "title": "Fact-Sheet",
+    "section": "Premise 2 - Drivers of Attainment",
+    "text": "Premise 2 - Drivers of Attainment\nBHCC Premise - economic advantage/disadvantage are the main drivers of results in the city\n\nBHCC School Admission Arrangements 2026-27 - 3.9 “Better equality of outcomes – results not driven by economic advantage.”\n\nFalse\nEconomic advantage/disadvantage is not the main driver of results in the city.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-2a---what-prof-stephen-gorard-actually-says-in-the-paper-underpinning-all-of-the-councils-claims",
+    "href": "consultation_factsheet.html#fact-2a---what-prof-stephen-gorard-actually-says-in-the-paper-underpinning-all-of-the-councils-claims",
+    "title": "Fact-Sheet",
+    "section": "Fact 2a - What Prof Stephen Gorard actually says in the paper underpinning all of the council’s claims",
+    "text": "Fact 2a - What Prof Stephen Gorard actually says in the paper underpinning all of the council’s claims\nFull paper here - https://journals.sagepub.com/doi/full/10.1177/2158244018825171\n\n“Whether school composition is a phantom or not, the school-level variables tell a consistent story across the duration of schooling. Pupils do worse in schools with clusters of disadvantage or clusters of prior attainment. Put another way, if this composition is real, then schools should be as mixed as possible both socially and academically. This could lead to improved outcomes of between 0.05 and 0.15 of a standard deviation for almost no cost.”\n\nInterpretation\n\nThis might not even be a real effect (see next point below).\nIn 2022-23 the mean school - level Attainment 8 score in Brighton was 47.56 (in England it was 45.9). The standard deviation was 6.92 (in England, 7.23).\n0.15 of of 6.92 = 1.038 point improvement. 0.05 = 0.35 pt improvement.\nFor an undetermined additional level of mixing in schools, if the effect is not a ‘phantom’, the maximum improvement (if no costs involved in achieving additional mixing) we might expect for an average student is a 1pt improvement across equivalent 10 GCSEs taken. e.g moving from a C to a B in Maths or an E to a D in French, only.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-2b---drivers-of-attainment",
+    "href": "consultation_factsheet.html#fact-2b---drivers-of-attainment",
+    "title": "Fact-Sheet",
+    "section": "Fact 2b - Drivers of Attainment",
+    "text": "Fact 2b - Drivers of Attainment\nBut for Brighton, Gorard’s effects might not be real. Examining state secondary schools in England experiencing the same concentrations of disadvantage as those in Brighton and Hove, there is NO RELATIONSHIP between variations in levels of disadvantage and levels of attainment or progress.\n\n\nhttps://adamdennett.github.io/BH_Schools_Consultation/attainment_extra.html",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-2c---drivers-of-attainment",
+    "href": "consultation_factsheet.html#fact-2c---drivers-of-attainment",
+    "title": "Fact-Sheet",
+    "section": "Fact 2c - Drivers of Attainment",
+    "text": "Fact 2c - Drivers of Attainment\nFar more important as a driver of attainment in Brighton (and in other secondary schools in England) is persistent absence. There is a strong negative correlation between persistent absence and both Attainment 8 and Progress 8 scores nationally and in Brighton and Hove.\nAfter controlling for the effects of persistent absence in Brighton, the disadvantage effect becomes statistically insignificant.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-3---geographic-spread-of-schools",
+    "href": "consultation_factsheet.html#premise-3---geographic-spread-of-schools",
+    "title": "Fact-Sheet",
+    "section": "Premise 3 - Geographic Spread of Schools",
+    "text": "Premise 3 - Geographic Spread of Schools\nBHCC Premise - Brighton and Hove should maintain the geographic spread of secondary schools in the city\n\nBHCC School Admission Arrangements 2026-27 - 3.9 “Maintaining the geographic spread of secondary schools in the city”\n\nDebatable\nThis is a party political desire to keep the current configuration of schools. The current geographic spread of schools relative to the city’s population is in part causing the viability issues for Longhill. Trying to keep a large Longhill in its current location is likely what is driving proposed PAN reductions at popular, oversubscribed schools elsewhere in the city.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-3",
+    "href": "consultation_factsheet.html#fact-3",
+    "title": "Fact-Sheet",
+    "section": "Fact 3",
+    "text": "Fact 3\nDemand for schools varies significantly across the city. At the lower end, in the last 11-years, Longhill has received fewer total applications (1st, 2nd and 3rd choice combined) than its Published Admission Number (PAN) of 270. In-demand schools would normally expect considerably more total applications than places available as 2nd and 3rd choices are often allocated places elsewhere. For comparison, another single catchment school - Patcham High, has generally received around twice as many total applications than PAN.\nOver the last 11 years (since 2013), Longhill’s total offers have trended down every year, and it has never achieved anywhere near 270 offers. It’s peak was in 2014 when it made 209 offers. Last year it made 94 offers.\n\nhttps://adamdennett.github.io/BH_Schools_2/schools_wk2.html#school-application-and-offer-history-across-brighton",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-4---social-mixing-in-schools-and-attainment",
+    "href": "consultation_factsheet.html#premise-4---social-mixing-in-schools-and-attainment",
+    "title": "Fact-Sheet",
+    "section": "Premise 4 - Social Mixing in Schools and Attainment",
+    "text": "Premise 4 - Social Mixing in Schools and Attainment\nBHCC Premise - Brighton and Hove’s schools are not mixed enough and increasing mixing (by any means) will create better outcomes for disadvantaged pupils.\n\nBHCC School Admission Arrangements 2026-27 - 3.9 “Deliver a ‘comprehensive’ offer from our city schools as a more mixed pupil intake creates better outcomes for disadvantaged pupils.”\n\nConflicting evidence, but Brighton specific analysis suggests increasing mixing will not benefit disadvantaged students in the city.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-4",
+    "href": "consultation_factsheet.html#fact-4",
+    "title": "Fact-Sheet",
+    "section": "Fact 4",
+    "text": "Fact 4\nDemand for schools varies significantly across the city. At the lower end, in the last 11-years, Longhill has received fewer total applications (1st, 2nd and 3rd choice combined) than its Published Admission Number (PAN) of 270. In-demand schools would normally expect considerably more total applications than places available as 2nd and 3rd choices are often allocated places elsewhere. For comparison, another single catchment school - Patcham High, has generally received around twice as many total applications than PAN.\nOver the last 11 years (since 2013), Longhill’s total offers have trended down every year, and it has never achieved anywhere near 270 offers. It’s peak was in 2014 when it made 209 offers. Last year it made 94 offers.\n\nhttps://adamdennett.github.io/BH_Schools_2/schools_wk2.html#school-application-and-offer-history-across-brighton",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-5---greater-access-to-a-range-of-schools",
+    "href": "consultation_factsheet.html#premise-5---greater-access-to-a-range-of-schools",
+    "title": "Fact-Sheet",
+    "section": "Premise 5 - Greater Access to a Range of Schools",
+    "text": "Premise 5 - Greater Access to a Range of Schools",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-5",
+    "href": "consultation_factsheet.html#fact-5",
+    "title": "Fact-Sheet",
+    "section": "Fact 5",
+    "text": "Fact 5",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-6---fairness",
+    "href": "consultation_factsheet.html#premise-6---fairness",
+    "title": "Fact-Sheet",
+    "section": "Premise 6 - Fairness",
+    "text": "Premise 6 - Fairness",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-7---academic-evidence-to-support-the-councils-approach",
+    "href": "consultation_factsheet.html#premise-7---academic-evidence-to-support-the-councils-approach",
+    "title": "Brighton and Hove Secondary Schools Consultation - Fact Sheet",
+    "section": "Premise 7 - Academic Evidence to Support the Council’s Approach",
+    "text": "Premise 7 - Academic Evidence to Support the Council’s Approach",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#opinion-3",
+    "href": "consultation_factsheet.html#opinion-3",
+    "title": "Fact-Sheet",
+    "section": "Opinion 3",
+    "text": "Opinion 3\nLonghill’s challenges are multiple, but two stick out:\n\nit is geographically remote\nas a school with the capacity to admit 270 pupils a year, its site is far too large relative to the numbers of students it has attracted in recent years and will likely attract in the future if the trend continues the 10 year trajectory.\nModelling I carried out here suggests that if Longhill were moved further west to somewhere near the Race Course, it would be far more attractive to students - all other things being equal.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-2---social-mixing-in-schools-and-attainment",
+    "href": "consultation_factsheet.html#premise-2---social-mixing-in-schools-and-attainment",
+    "title": "Fact-Sheet",
+    "section": "Premise 2 - Social Mixing in Schools and Attainment",
+    "text": "Premise 2 - Social Mixing in Schools and Attainment\nBHCC Premise - Brighton and Hove’s schools are not mixed enough and increasing mixing (by any means) will create better outcomes for disadvantaged pupils.\n\nBHCC School Admission Arrangements 2026-27 - 3.9 “Deliver a ‘comprehensive’ offer from our city schools as a more mixed pupil intake creates better outcomes for disadvantaged pupils.”\n\nConflicting evidence, but Brighton specific analysis suggests increasing mixing will not benefit disadvantaged students in the city. See Premise 3.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-2",
+    "href": "consultation_factsheet.html#fact-2",
+    "title": "Fact-Sheet",
+    "section": "Fact 2",
+    "text": "Fact 2\nBrighton and Hove’s schools are already very mixed (relative to other LEAs in England) according to the relative proportions of disadvantaged and non-disadvantaged pupils across state secondary schools in the whole city.\nStephen Gorard proposed an Index that some called the ‘Gorard Segregation Index’ which can be used to examine segregation of disadvantaged and non-disadvantaged students in schools. The formula for calculating it is here - https://sru.soc.surrey.ac.uk/SRU30.html\nThe plot below shows where Brighton sits relative to other LEAs in England on both the Gorard Segregation Index (for disadvantage) and a more standard dissimilarity index for the same variables. 0 = total integration of disadvantaged and non-disadvantaged students, 1 = total segregation. Brighton and Hove has a Gordard Segregation Index score of 0.13 - ranking it 44th BEST in the country for integration. 110 LEAs have schools which are more segregated.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-3---drivers-of-attainment",
+    "href": "consultation_factsheet.html#premise-3---drivers-of-attainment",
+    "title": "Fact-Sheet",
+    "section": "Premise 3 - Drivers of Attainment",
+    "text": "Premise 3 - Drivers of Attainment\nBHCC Premise - economic advantage/disadvantage are the main drivers of results in the city\n\nBHCC School Admission Arrangements 2026-27 - 3.9 “Better equality of outcomes – results not driven by economic advantage.”\n\nFalse\nEconomic advantage/disadvantage is not the main driver of results in the city.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-3a---what-prof-stephen-gorard-actually-says-in-the-paper-underpinning-all-of-the-councils-claims",
+    "href": "consultation_factsheet.html#fact-3a---what-prof-stephen-gorard-actually-says-in-the-paper-underpinning-all-of-the-councils-claims",
+    "title": "Fact-Sheet",
+    "section": "Fact 3a - What Prof Stephen Gorard actually says in the paper underpinning all of the council’s claims",
+    "text": "Fact 3a - What Prof Stephen Gorard actually says in the paper underpinning all of the council’s claims\nFull paper here - https://journals.sagepub.com/doi/full/10.1177/2158244018825171\n\n“Whether school composition is a phantom or not, the school-level variables tell a consistent story across the duration of schooling. Pupils do worse in schools with clusters of disadvantage or clusters of prior attainment. Put another way, if this composition is real, then schools should be as mixed as possible both socially and academically. This could lead to improved outcomes of between 0.05 and 0.15 of a standard deviation for almost no cost.”\n\nInterpretation\n\nThis might not even be a real effect (see next point below).\nIn 2022-23 the mean school - level Attainment 8 score in Brighton was 47.56 (in England it was 45.9). The standard deviation was 6.92 (in England, 7.23).\n0.15 of of 6.92 = 1.038 point improvement. 0.05 = 0.35 pt improvement.\nIf the effect is real, if we increase mixing by some amount (unspecified), the maximum improvement (if there are no costs involved in achieving additional mixing) we might expect for an average student is a 1pt improvement across equivalent 10 GCSEs taken. e.g moving from a C to a B in Maths or an E to a D in French, only.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-3b---drivers-of-attainment",
+    "href": "consultation_factsheet.html#fact-3b---drivers-of-attainment",
+    "title": "Fact-Sheet",
+    "section": "Fact 3b - Drivers of Attainment",
+    "text": "Fact 3b - Drivers of Attainment\nBut for Brighton, Gorard’s effects might not be real. Examining state secondary schools in England experiencing the same concentrations of disadvantage as those in Brighton and Hove, there is NO RELATIONSHIP between variations in levels of disadvantage and levels of attainment or progress.\n\n\nhttps://adamdennett.github.io/BH_Schools_Consultation/attainment_extra.html",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-3c---drivers-of-attainment",
+    "href": "consultation_factsheet.html#fact-3c---drivers-of-attainment",
+    "title": "Fact-Sheet",
+    "section": "Fact 3c - Drivers of Attainment",
+    "text": "Fact 3c - Drivers of Attainment\nFar more important as a driver of attainment in Brighton (and in other secondary schools in England) is persistent absence. There is a strong negative correlation between persistent absence and both Attainment 8 and Progress 8 scores nationally and in Brighton and Hove.\nAfter controlling for the effects of persistent absence in Brighton, the disadvantage effect becomes statistically insignificant.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#premise-4---geographic-spread-of-schools",
+    "href": "consultation_factsheet.html#premise-4---geographic-spread-of-schools",
+    "title": "Fact-Sheet",
+    "section": "Premise 4 - Geographic Spread of Schools",
+    "text": "Premise 4 - Geographic Spread of Schools\nBHCC Premise - Brighton and Hove should maintain the geographic spread of secondary schools in the city\n\nBHCC School Admission Arrangements 2026-27 - 3.9 “Maintaining the geographic spread of secondary schools in the city”\n\nDebatable\nThis is a party political desire to keep the current configuration of schools. The current geographic spread of schools relative to the city’s population is in part causing the viability issues for Longhill. Trying to keep a large Longhill in its current location is likely what is driving proposed PAN reductions at popular, oversubscribed schools elsewhere in the city.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#opinion-4",
+    "href": "consultation_factsheet.html#opinion-4",
+    "title": "Fact-Sheet",
+    "section": "Opinion 4",
+    "text": "Opinion 4\nLonghill’s challenges are multiple, but two stick out:\n\nit is geographically remote\nas a school with the capacity to admit 270 pupils a year, its site is far too large relative to the numbers of students it has attracted in recent years and will likely attract in the future if the trend continues the 10 year trajectory.\nModelling I carried out here suggests that if Longhill were moved further west to somewhere near the Race Course, it would be far more attractive to students - all other things being equal.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
+  },
+  {
+    "objectID": "consultation_factsheet.html#fact-2---social-mixing",
+    "href": "consultation_factsheet.html#fact-2---social-mixing",
+    "title": "Fact-Sheet",
+    "section": "Fact 2 - Social Mixing",
+    "text": "Fact 2 - Social Mixing\nBrighton and Hove’s schools are already very mixed (relative to other LEAs in England) according to the relative proportions of disadvantaged and non-disadvantaged pupils across state secondary schools in the whole city.\nStephen Gorard proposed an Index that some called the ‘Gorard Segregation Index’ which can be used to examine segregation of disadvantaged and non-disadvantaged students in schools. The formula for calculating it is here - https://sru.soc.surrey.ac.uk/SRU30.html\nThe plot below shows where Brighton sits relative to other LEAs in England on both the Gorard Segregation Index (for disadvantage) and a more standard dissimilarity index for the same variables. 0 = total integration of disadvantaged and non-disadvantaged students, 1 = total segregation. Brighton and Hove has a Gordard Segregation Index score of 0.13 - ranking it 44th BEST in the country for integration. 110 LEAs have schools which are more segregated.",
+    "crumbs": [
+      "Analysis",
+      "Fact-Sheet"
+    ]
   }
 ]
