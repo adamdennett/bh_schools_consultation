@@ -39,7 +39,7 @@ library(tidytransit)
 
 -   There is a large body of literature including recent government reports, which states unquivocally that if improving attainment is the goal, then the best way to achieve this is through reducing school absence and in particular, persistent absence.
 
--   This paper finds that pupil absence is the main / a pivotal factor for attainment and the attainment gap in Brighton & Hove. And that the measures currently proposed could make this worse rather than better.
+-   This paper finds that pupil absence is the main factor driving attainment and the attainment gap in Brighton & Hove. And that the measures currently proposed by the council could make this worse rather than better.
 
 -   Exploring national school-level data for 2022-23 published by the Department for Education alongside some LEA-level data going back to 2016, it is clear that Brighton and Hove has a more serious problem with persistent absence than most other local authorities in England. And it is absence over and above any other factor, including concentrations of disadvantage, that is leading to any reduced levels of attainment observed in the city.
 
