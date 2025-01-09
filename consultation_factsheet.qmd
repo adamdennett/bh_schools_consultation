@@ -97,7 +97,7 @@ BHCC Premise - Brighton and Hove should maintain the geographic spread of second
 
 This is a party political desire to keep the current configuration of schools. The current geographic spread of schools relative to the city's population is in part causing the viability issues for Longhill. Trying to keep a large Longhill in its current location is likely what is driving proposed PAN reductions at popular, oversubscribed schools elsewhere in the city.
 
-## Fact 4
+## Fact 4 - Demand and Geodemographics
 
 Demand for schools varies significantly across the city. At the lower end, in the last 11-years, Longhill has received fewer ***total applications*** (1st, 2nd and 3rd choice combined) than its Published Admission Number (PAN) of 270. In-demand schools would normally expect considerably more *total applications* than places available as 2nd and 3rd choices are often allocated places elsewhere. For comparison, another single catchment school - Patcham High, has generally received around ***twice as many*** total applications than PAN.
 
