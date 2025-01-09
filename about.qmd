@@ -1,6 +1,18 @@
 ---
-title: "About"
+title: "About + Previous Work"
 ---
+
+### Work From Earlier in The Process:
+
+[Week 1](https://adamdennett.github.io/BH_Secondary_Admissions_Analysis/BH_Sec_Sch_Analysis.html)
+
+[Week 2](https://adamdennett.github.io/BH_Schools_2/schools_wk2.html)
+
+[Week 3](https://adamdennett.github.io/BH_Schools_2/schools_wk3.html)
+
+[Addendum - Educational Performance](https://adamdennett.github.io/BH_Schools_2/stain_removal.html)
+
+[Fact-sheet 1](https://adamdennett.github.io/BH_Schools_2/factsheet.html)
 
 ### Declaration of Interests
 

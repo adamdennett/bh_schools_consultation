@@ -16,7 +16,7 @@ website:
     style: "docked"
     search: true
     contents:
-      - text: "About"
+      - text: "About + Previous Work"
         href: about.qmd
       - section: "Analysis"
         contents: 
