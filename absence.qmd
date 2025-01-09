@@ -30,6 +30,7 @@ library(osmextract)
 library(stplanr)
 library(od)
 library(tidytransit)
+library(ggrepel)
 
 ```
 
@@ -55,7 +56,7 @@ library(tidytransit)
 
 -   In Brighton and Hove in 2022/23, disadvantage becomes a statistically insignificant variable in the presence of persistent absence, although the small number of data points means this needs further investigation.
 
--   As a consequence of misdiagnosing the problem, the treatment prescribed by the council not only fails to address the real underlying issue, but it actually stands to make it much worse. The 20% out-of-catchment open admissions criteria, if implemented, will lead to up to 30% of the City's children having to attend a school out of catchment (20% through 'choice' and 10% through forced displacement). 
+-   As a consequence of misdiagnosing the problem, the treatment prescribed by the council not only fails to address the real underlying issue, but it actually stands to make it much worse. The 20% out-of-catchment open admissions criteria, if implemented, will lead to up to 30% of the City's children having to attend a school out of catchment (20% through 'choice' and 10% through forced displacement).
 
 -   If the 20% out of catchment priority is implemented then (according to figures derived from the Council Consultation papers) by 2030, some 3,234 pupils a day (out of 10,843 - 1/3) will have to travel to and from school out of catchment. Evidence from FFT education data lab using National Pupil Database data from the UK confirms that pupils who live nearest to school attend more often. Deliberately designing more travel into the school system, given the evidence presented in this piece, can only be viewed as either a conscious move to make educational outcomes for this large proportion of students in the city worse, or a total failure to understand the problem given the stated objectives.
 
@@ -101,9 +102,169 @@ The underpinning assumptions in those statements above and the proposals that fo
 
 But in much the same way as when we go to the doctor, we expect an accurate diagnosis and corresponding efficacious treatment, we all know that unfortunately, sometimes, neither diagnosis nor treatment are correct.
 
-We know the council's prescribed treatment has been influenced quite heavily by some of the work of Stephen Gorard (<https://theconversation.com/poorer-pupils-do-worse-at-school-heres-how-to-reduce-the-attainment-gap-205535>), but as well as misinterpreting some of his main evidence (where disadvantaged students getting access to highly performing schools with low levels of disadvantaged students improves their outcomes), do we know that the council's diagnosis for the city is even correct? Before prescribing a treatment, should we have not carried out a thorough examination of the patient first in case a more serious underlying ailment is causing the symptoms? This is all before we get anywhere near the negative side effects.
+We know the council's prescribed treatment has been influenced quite heavily by some of the work of Stephen Gorard (<https://theconversation.com/poorer-pupils-do-worse-at-school-heres-how-to-reduce-the-attainment-gap-205535>) and a full paper here - <https://journals.sagepub.com/doi/full/10.1177/2158244018825171>, but the effect of school level mixing, relative to other factors is small. Here is what Gorard says in the conclusions in his influential paper:
 
-Not wanting to strain the metaphor further, how do we know for sure that a lack of mixing is indeed the main factor holding back disadvantaged attainment? What if it is not? And if it is not, what is more important? And if there are more important factors, might there be more effective routes to minimising disadvantaged educational outcomes that could offer better or faster results, and indeed do so without the levels of disruption currently on the table?
+> "Whether school composition is a phantom or not, the school-level variables tell a consistent story across the duration of schooling. Pupils do worse in schools with clusters of disadvantage or clusters of prior attainment. Put another way, if this composition is real, then schools should be as mixed as possible both socially and academically. This could lead to improved outcomes of between 0.05 and 0.15 of a standard deviation for almost no cost."
+
+Now this needs a bit of unpicking.
+
+1)  Gorard is not 100% confident that the school-level effect is a real one. The "Phantom" being referred to in the paper is the fact that measuring pupil-level data and characteristics could be imprecise and when aggregated up to the school level, might give misleading impressions.
+
+2)  But if we accept that it is real - and let's just say it is - then increased mixing in schools could lead to improved outcomes of between 0.05 and 0.15 of a standard deviation - now Gorard says "for almost no cost", perhaps a better way of phrasing this would be "assuming no cost" - as the means by which increasing mixing in schools occurs could come at quite high cost - particularly as we have seen in Brighton where the mechanism is essentially via long-distance busing of children between catchment areas. This is likely to incur quite considerable costs for children (tiredness, anxiety, reluctance to attend if school far away etc.)
+
+3)  In the case of Brighton and Hove, we can put a real number on 0.05 and 0.15 of a standard deviation in approved attainment? In 2022-23 the mean school - level [Attainment 8](https://www.ethnicity-facts-figures.service.gov.uk/education-skills-and-training/11-to-16-years-old/gcse-results-attainment-8-for-children-aged-14-to-16-key-stage-4/latest/) score was 47.56 (in England it was 45.9). The standard deviation (how much, on average, the attainment 8 scores in the city vary around that mean) was 6.92 (in England, 7.23). 0.15 (the most improvment Gorard thinks might be possible from increased mixing) of 6.92 = 1.038.
+
+4)  So if social mixing can occur at no negative cost, we might expect - at best according to the Gorard paper - a 1pt improvement in the average pupil (and I assume by extension average school-level) Attainment 8 score in 1 subject out of the 10 used to calculate the score. If no negative costs. Although it's not clear how much of a change in the levels of mixing would be required to affect this 1pt improvement - usually these things relate to a 1-unit change in $x$ (concentration of disadvantaged pupils, but this feels high and is not clear?) for a corresponding change in $y$, but this is not clear in the paper.
+
+5)  For context, in Brighton and Hove in 2022-23, Attainment 8 scores at the school level ranged from 35.8 to 54.5. So the effect is at best small, and relative to the range experienced by schools in Brighton (almost 20pts), very small.
+
+So if there are no negative costs associated with increasing social mixing (and it's not a phantom effect), we might expect a very small positive impact on attainment by increasing mixing, but we don't know how much additional mixing (over and above the mixing already present) will be required to reach this maximum benefit of 1 Attainment 8 point.
+
+If we look at the level of mixing and segregation in Brighton's schools already (using the [Gorard Segregation Index](https://sru.soc.surrey.ac.uk/SRU30.html)) - see below - we can observe that Brighton and Hove is already ranked the 44th best (out of 154 LEAs) in England for its levels of disadvantaged integration, so it already has less headroom than other LEAs for improvement.
+
+```{r echo=T, message=FALSE, warning=FALSE}
+
+#all england schools
+edubase_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>% 
+  mutate(urn = as.character(urn))
+
+#read in Brighton Secondary Schools Data
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700)
+
+btn_urn_list <- brighton_sec_schools %>% 
+  select(urn) 
+
+england_abs <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_abs.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_census <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_census.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_ks4final <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_ks4final.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+england_school_information <- read_csv(here("data", "Performancetables_Eng_2022_23", "2022-2023", "england_school_information.csv"), na = c("", "NA", "SUPP", "NP", "NE"))
+
+la_codes <- read_csv(here("data", "Performancetables_metadata", "2022-2023", "la_and_region_codes_meta.csv"), na = c("", "NA", "SUPP", "NP", "NE")) %>% 
+  clean_names()
+
+england_ks4final <- england_ks4final %>%
+  mutate(URN = as.character(URN)) %>%
+  mutate(across(TOTPUPS:PTOTENT_E_COVID_IMPACTED_PTQ_EE, ~ parse_number(as.character(.))))
+
+england_ks4final <- england_ks4final %>%
+  filter(!is.na(URN))
+
+england_abs <- england_abs %>%
+  mutate(URN = as.character(URN))
+
+england_census <- england_census %>%
+  mutate(URN = as.character(URN))
+
+england_school_information <- england_school_information %>%
+  mutate(URN = as.character(URN))
+
+# Left join england_ks4final with england_abs
+england_school_2022_23 <- england_ks4final %>%
+  left_join(england_abs, by = "URN") %>%
+  left_join(england_census, by = "URN") %>%
+  left_join(england_school_information, by = "URN")
+
+data_types <- sapply(england_school_2022_23, class)
+england_school_2022_23_meta <- data.frame(Field = names(data_types), DataType = data_types)
+
+btn_sub <- england_school_2022_23 %>%
+  filter(URN %in% btn_urn_list$urn)
+
+#P8_BANDING
+england_school_2022_23_not_special <- england_school_2022_23 %>%
+  filter(MINORGROUP != "Special school" & ADMPOL.x == "NSE")
+
+eng_sch_2022_23_not_special_plus <- england_school_2022_23_not_special %>% left_join(
+  edubase_schools, by = join_by(URN == urn)
+)
+
+
+calculate_index_of_dissimilarity <- function(df) {
+  # Ensure the dataframe has the necessary columns
+  required_columns <- c("TFSM6CLA1A", "TNOTFSM6CLA1A")
+  if (!all(required_columns %in% colnames(df))) {
+    stop("Dataframe must contain the columns: TFSM6CLA1A and TNOTFSM6CLA1A")
+  }
+  
+  # Calculate the total number of disadvantaged and non-disadvantaged pupils
+  total_disadvantaged <- sum(df$TFSM6CLA1A, na.rm = TRUE)
+  total_non_disadvantaged <- sum(df$TNOTFSM6CLA1A, na.rm = TRUE)
+  
+  # Calculate the index of dissimilarity
+  df$dissimilarity_component <- abs(df$TFSM6CLA1A / total_disadvantaged - df$TNOTFSM6CLA1A / total_non_disadvantaged)
+  index_of_dissimilarity <- 0.5 * sum(df$dissimilarity_component, na.rm = TRUE)
+  
+  return(index_of_dissimilarity)
+}
+
+calculate_gorard_segregation <- function(df) {
+  # Ensure the dataframe has the necessary columns
+  required_columns <- c("TFSM6CLA1A", "TNOTFSM6CLA1A", "TPUP")
+  if (!all(required_columns %in% colnames(df))) {
+    stop("Dataframe must contain the columns: TFSM6CLA1A, TNOTFSM6CLA1A, and TPUP")
+  }
+  
+  # Calculate the total number of disadvantaged, non-disadvantaged pupils, and total pupils
+  total_disadvantaged <- sum(df$TFSM6CLA1A, na.rm = TRUE)
+  total_pupils <- sum(df$TPUP, na.rm = TRUE)
+  
+  # Calculate the Gorard Segregation Index
+  df$gorard_component <- abs(df$TFSM6CLA1A / total_disadvantaged - df$TPUP / total_pupils)
+  gorard_segregation <- 0.5 * sum(df$gorard_component, na.rm = TRUE)
+  
+  return(gorard_segregation)
+}
+
+# Function to calculate the Index of Dissimilarity
+calculate_index_of_dissimilarity <- function(df) {
+  total_disadvantaged <- sum(df$TFSM6CLA1A, na.rm = TRUE)
+  total_non_disadvantaged <- sum(df$TNOTFSM6CLA1A, na.rm = TRUE)
+  
+  df$dissimilarity_component <- abs(df$TFSM6CLA1A / total_disadvantaged - df$TNOTFSM6CLA1A / total_non_disadvantaged)
+  index_of_dissimilarity <- 0.5 * sum(df$dissimilarity_component, na.rm = TRUE)
+  
+  return(index_of_dissimilarity)
+}
+
+
+# Apply the functions to each LEA and create a new dataframe with the results
+results_df <- england_school_2022_23_not_special %>%
+  group_by(LEA) %>%
+  summarise(
+    index_of_dissimilarity = calculate_index_of_dissimilarity(cur_data()),
+    gorard_segregation = calculate_gorard_segregation(cur_data())
+  )
+
+
+# Join the dataframes
+merged_df <- left_join(results_df, la_codes, by = c("LEA" = "lea"))
+
+
+ggplot(merged_df, aes(x = index_of_dissimilarity, y = gorard_segregation)) +
+  geom_point(aes(color = factor(LEA == 846)), size = 3, alpha = 0.7) +
+  scale_color_manual(values = c("grey", "red")) +
+  geom_text_repel(data = subset(merged_df, LEA == 846), 
+                  aes(label = "Brighton and Hove"), 
+                  size = 3, nudge_x = 0.1, nudge_y = -0.05, force = 10, box.padding = 0.5, direction = "both") +
+  labs(title = "Scatter Plot of Index of Dissimilarity vs \nGorard Segregation, all LEAs in England",
+       x = "Index of Dissimilarity",
+       y = "Gorard Segregation Index") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+But small likely effects and relatively good levels of integration aside, do we know that the council's diagnosis for the city is even correct? Before prescribing a treatment, should we have not carried out a thorough examination of the patient first in case a more serious underlying ailment is causing the symptoms? This is all before we get anywhere near the negative side effects.
+
+Not wanting to strain the metaphor further, how do we know for sure that a lack of mixing is indeed the main factor holding back disadvantaged attainment? What if it is not? And if it is not, what is more important? And if there are more important factors, might there be more effective routes to minimising disadvantaged educational outcomes that could offer better (more than a max 1pt improvement in 1 subject at GSCE) or faster results, and indeed do so without the levels of disruption currently on the table?
 
 These are very important questions to ask, not least because under the current proposals, one of the experimental 'treatments' being prescribed by the council is forced mixing in schools through artificially reducing places in schools for local students and busing (or for at least 1/4 of children, privately driving) significant numbers of students from some neighbourhoods (some by 'choice' and some through 'displacement' [- see the PGS explainer here](https://www.parentsupport.group/wp-content/uploads/2024/12/schools_admissions_2026_explainer_v1.0_2024-12-4-final.pdf)) to schools a long way from their homes. This kind of forced mixing not only has a questionable history but has huge negative social/community, financial and environmental implications for our city (many of which were [raised in the Parent Support Group's latest deputation at the Labour Cabinet meeting in November](https://www.parentsupport.group/deputation-to-brighton-council-cabinet-5th-dec-2024/)) which have thus-far been ignored by those advocating for the proposals.
 
@@ -137,7 +298,7 @@ Next, [@claymore2023a] (already citied above) in a paper titled: "[Being Present
 
 > *"over half of the gap in outcomes between disadvantaged pupils and their more affluent peers is associated with the underlying group differences in absence, exclusion and pupil transfer rates. Improving these underlying factors for disadvantaged pupils should therefore substantially boost outcomes for the group"*
 
-I could also go on to cite work by the National Governance Association [@nga2024] on improving School Attendance, or the Department for Education's extensive resources on why improving school attendance is important[@dfe2023] [@dfe2024], but I think you are starting to get the picture. It makes sense, right? If you don't go to school, it's harder to learn and achieve.
+I could also go on to cite work by the National Governance Association [@nga2024] on improving School Attendance, or the Department for Education's extensive resources on why improving school attendance is important[@dfe2023] [@dfe2024], or this excellent paper by [@klein2024], but I think you are starting to get the picture. It makes sense, right? If you don't go to school, it's harder to learn and achieve.
 
 So the literature clearly says absence is important but:
 
