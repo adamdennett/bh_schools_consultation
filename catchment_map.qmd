@@ -1,7 +1,6 @@
 ---
 title: "Detailed, Zoomable Consultation Catchment Maps"
 author: "Adam Dennett"
-format: revealjs
 ---
 
 

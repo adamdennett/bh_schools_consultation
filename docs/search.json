@@ -760,7 +760,7 @@
     "section": "Proposed Catchments",
     "text": "Proposed Catchments",
     "crumbs": [
-      "Analysis",
+      "Maps",
       "Detailed, Zoomable Consultation Catchment Maps"
     ]
   },
@@ -769,9 +769,9 @@
     "href": "catchment_map.html#both-overlaid",
     "title": "Detailed, Zoomable Consultation Catchment Maps",
     "section": "Both overlaid",
-    "text": "Both overlaid",
+    "text": "Both overlaid\n\n\nCode\ntm_shape(optionZ) +\n  tm_polygons(border.col = \"red\", alpha = 0) +\ntm_shape(current) +\n  tm_polygons(border.col = \"black\", alpha = 0)",
     "crumbs": [
-      "Analysis",
+      "Maps",
       "Detailed, Zoomable Consultation Catchment Maps"
     ]
   }
