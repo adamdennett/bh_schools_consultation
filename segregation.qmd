@@ -170,7 +170,7 @@ print(gorard_segregation)
 ```{r}
 library(dplyr)#check functions work as intended
 
-test <- england_school_2022_23_not_special[,c("LEA", "SCHNAME.x","TFSM6CLA1A","TNOTFSM6CLA1A", "TPUP")]
+test <- england_school_2022_23_not_special[,c("LEA", "SCHNAME.x","ATT8SCR","ATT8SCR_NFSM6CLA1A","ATT8SCR_FSM6CLA1A","TFSM6CLA1A","TNOTFSM6CLA1A", "TPUP")]
 
 required_columns <- c("TFSM6CLA1A", "TNOTFSM6CLA1A", "TPUP")
   if (!all(required_columns %in% colnames(test))) {
@@ -192,11 +192,54 @@ total_disadvantaged <- sum(test_btn$TFSM6CLA1A, na.rm = TRUE)
 total_pupils <- sum(test_btn$TPUP, na.rm = TRUE)
   
   # Calculate the Gorard Segregation Index
-test_btn$gorard_component <- abs(test_btn$TFSM6CLA1A / total_disadvantaged - test_btn$TPUP / total_pupils)
+#test_btn$gorard_component <- abs(test_btn$TFSM6CLA1A / total_disadvantaged - test_btn$TPUP / total_pupils)
 
 gorard_segregation <- 0.5 * sum(test_btn$gorard_component, na.rm = TRUE)
 
 ```
+
+```{r}
+
+#mean and sd deviation for Eng and BTN test scores
+
+mean_att8scr_eng <- mean(test$ATT8SCR, na.rm = TRUE)
+mean_att8scr_btn <- mean(test_btn$ATT8SCR, na.rm = TRUE)
+sd_att8scr_eng <- sd(test$ATT8SCR, na.rm = TRUE)
+sd_att8scr_btn <- sd(test_btn$ATT8SCR, na.rm = TRUE)
+min_att8scr_eng <- min(test$ATT8SCR, na.rm = TRUE)
+min_att8scr_btn <- min(test_btn$ATT8SCR, na.rm = TRUE)
+max_att8scr_eng <- max(test$ATT8SCR, na.rm = TRUE)
+max_att8scr_btn <- max(test_btn$ATT8SCR, na.rm = TRUE)
+
+
+# Calculate the min and max values for the subset range
+min_value <- min(test_btn$gorard_component, na.rm = TRUE)
+max_value <- max(test_btn$gorard_component, na.rm = TRUE)
+
+# Fit the linear model for the entire data
+lm_model <- lm(ATT8SCR ~ gorard_component, data = test)
+lm_summary <- summary(lm_model)
+slope <- lm_summary$coefficients[2, 1]
+intercept <- lm_summary$coefficients[1, 1]
+r_squared <- lm_summary$r.squared
+
+# Annotation text
+annotation_text <- paste("Slope:", round(slope, 2), "\nIntercept:", round(intercept, 2), "\nR-squared:", round(r_squared, 2))
+
+ggplot(test, aes(y = ATT8SCR, x = gorard_component)) +
+  geom_point() +
+  geom_point(data = test_btn, aes(y = ATT8SCR, x = gorard_component, colour = SCHNAME.x)) +
+  geom_vline(xintercept = min_value, linetype = "dashed", color = "blue") +
+  geom_vline(xintercept = max_value, linetype = "dashed", color = "blue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(title = "Attainment 8 Non-Disadvantaged vs % School Percentage of \nDisadvantaged Students, 2022-23",
+       x = "Gorard Segregation",
+       y = "Attainment 8 measure",
+       color = "B&H Schools \nOfsted Rating") +
+  theme_minimal() 
+```
+
+
 
 ```{r}
 library(dplyr)

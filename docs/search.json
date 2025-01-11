@@ -741,5 +741,38 @@
       "Analysis",
       "Fact-Sheet"
     ]
+  },
+  {
+    "objectID": "catchment_map.html#current-catchments",
+    "href": "catchment_map.html#current-catchments",
+    "title": "Detailed, Zoomable Consultation Catchment Maps",
+    "section": "Current Catchments",
+    "text": "Current Catchments",
+    "crumbs": [
+      "Analysis",
+      "Detailed, Zoomable Consultation Catchment Maps"
+    ]
+  },
+  {
+    "objectID": "catchment_map.html#proposed-catchments",
+    "href": "catchment_map.html#proposed-catchments",
+    "title": "Detailed, Zoomable Consultation Catchment Maps",
+    "section": "Proposed Catchments",
+    "text": "Proposed Catchments",
+    "crumbs": [
+      "Analysis",
+      "Detailed, Zoomable Consultation Catchment Maps"
+    ]
+  },
+  {
+    "objectID": "catchment_map.html#both-overlaid",
+    "href": "catchment_map.html#both-overlaid",
+    "title": "Detailed, Zoomable Consultation Catchment Maps",
+    "section": "Both overlaid",
+    "text": "Both overlaid",
+    "crumbs": [
+      "Analysis",
+      "Detailed, Zoomable Consultation Catchment Maps"
+    ]
   }
 ]

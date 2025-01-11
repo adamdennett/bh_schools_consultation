@@ -1,0 +1,50 @@
+---
+title: "Detailed, Zoomable Consultation Catchment Maps"
+author: "Adam Dennett"
+format: revealjs
+---
+
+
+## Current Catchments
+
+```{r echo=F, message=F, warning=FALSE, include=F}
+library(tidyverse)
+library(sf)
+library(tmap)
+library(here)
+
+optionZ <- st_read(here("data","optionZ.geojson"))
+current <- st_read(here("data","current_catchments.geojson"))
+```
+
+```{r echo=F, message=F, warning=FALSE}
+
+
+tmap_mode("view")
+
+tm_shape(current) +
+  tm_polygons(border.col = "black", alpha = 0)
+
+
+
+
+```
+
+## Proposed Catchments
+
+```{r echo=F, message=F, warning=FALSE}
+
+tm_shape(optionZ) +
+  tm_polygons(border.col = "red", alpha = 0)
+```
+
+
+## Both overlaid
+
+```{r}
+tm_shape(optionZ) +
+  tm_polygons(border.col = "red", alpha = 0) +
+tm_shape(current) +
+  tm_polygons(border.col = "black", alpha = 0)
+```
+
