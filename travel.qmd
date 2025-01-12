@@ -1154,7 +1154,6 @@ ggplot(bn_pcds_sch_travel) +
 
 ```
 
-
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 # Load the ggplot2 library
 library(ggplot2)
@@ -1175,4 +1174,3 @@ ggplot(bn_pcds_sch_travel) +
 
 
 ```
-
