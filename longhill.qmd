@@ -44,7 +44,7 @@ con <- dbConnect(RPostgres::Postgres(),
                  sslmode = 'disable')
 
 #check connection
-dbListTables(con)
+#dbListTables(con)
 ```
 
 ```{r get-schools-info, warning=FALSE, message=FALSE, echo=FALSE}
@@ -98,7 +98,7 @@ r5r_core <- setup_r5(data_path = data_path)
 
 Travel Times to Longhill at 7:30 am on 1/12/22 from BN Postcodes
 
-```{r}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 
 bh_sec_sch1 <- bh_sec_sch %>% 
   filter(id == "114581")
@@ -157,7 +157,7 @@ tm_shape(bh_sec_sch1) +
 
 
 
-```{r}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 # set inputs
 origins = bn_pcds_r5r %>% filter(id == "BN1 6ZE") 
 destinations = bh_sec_sch1
