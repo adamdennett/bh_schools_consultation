@@ -3,7 +3,6 @@ title: "Detailed, Zoomable Consultation Catchment Maps"
 author: "Adam Dennett"
 ---
 
-
 ## Current Catchments
 
 ```{r echo=F, message=F, warning=FALSE, include=F}
@@ -37,7 +36,6 @@ tm_shape(optionZ) +
   tm_polygons(border.col = "red", alpha = 0)
 ```
 
-
 ## Both overlaid
 
 ```{r}
@@ -46,4 +44,3 @@ tm_shape(optionZ) +
 tm_shape(current) +
   tm_polygons(border.col = "black", alpha = 0)
 ```
-

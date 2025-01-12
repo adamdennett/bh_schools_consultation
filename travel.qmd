@@ -159,19 +159,19 @@ qtm(brighton_h3, alpha = 0.5)
 ```
 
 ```{r get-postcodes, echo=F, eval=TRUE, results='hide'}
-con <- dbConnect(RPostgres::Postgres(), 
-                 dbname = 'gisdb2',
-                 host = 'localhost',
-                 port = 5432,
-                 user = 'postgres',
-                 password = 'postgres',
-                 sslmode = 'disable')
+#con <- dbConnect(RPostgres::Postgres(), 
+#                 dbname = 'gisdb2',
+#                 host = 'localhost',
+#                 port = 5432,
+#                 user = 'postgres',
+#                 password = 'postgres',
+#                 sslmode = 'disable')
 
 # Read data from the specified table
 bn_postcodes <- st_read(con, query = "SELECT * FROM public.bn_codepoint_poly")
 bn_postcodes <- st_set_crs(bn_postcodes, 27700)
 
-dbDisconnect(con)
+#dbDisconnect(con)
 
 bn_postcode_centroids <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>% 
   st_as_sf(coords = c("long", "lat")) %>% 
@@ -258,8 +258,8 @@ pcds_2_longhill = aggregate(ttm_brighton_pcds_2_longhill$travel_time_p50, by=lis
 pcds_2_longhill <- rename(pcds_2_longhill, id = Group.1) 
 pcds_2_longhill <- rename(pcds_2_longhill, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
-
+dbWriteTable(con, name="pcds_2_longhill_walk_bus", value=pcds_2_longhill, overwrite=TRUE) #pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+ 
 pcds_geo_longhill = inner_join(bn_pcds_r5r, pcds_2_longhill, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
   st_set_crs(4326)
@@ -342,7 +342,7 @@ pcds_2_baca = aggregate(ttm_brighton_pcds_2_baca$travel_time_p50, by=list(ttm_br
 pcds_2_baca <- rename(pcds_2_baca, id = Group.1) 
 pcds_2_baca <- rename(pcds_2_baca, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_baca_walk_bus", value=pcds_2_baca, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_baca = inner_join(bn_pcds_r5r, pcds_2_baca, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -455,7 +455,7 @@ pcds_2_varndean = aggregate(ttm_brighton_pcds_2_varndean$travel_time_p50, by=lis
 pcds_2_varndean <- rename(pcds_2_varndean, id = Group.1) 
 pcds_2_varndean <- rename(pcds_2_varndean, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_varndean_walk_bus", value=pcds_2_varndean, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_varndean = inner_join(bn_pcds_r5r, pcds_2_varndean, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -568,7 +568,7 @@ pcds_2_ds = aggregate(ttm_brighton_pcds_2_ds$travel_time_p50, by=list(ttm_bright
 pcds_2_ds <- rename(pcds_2_ds, id = Group.1) 
 pcds_2_ds <- rename(pcds_2_ds, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_ds_walk_bus", value=pcds_2_ds, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_ds = inner_join(bn_pcds_r5r, pcds_2_ds, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -632,7 +632,7 @@ pcds_2_patcham = aggregate(ttm_brighton_pcds_2_patcham$travel_time_p50, by=list(
 pcds_2_patcham <- rename(pcds_2_patcham, id = Group.1) 
 pcds_2_patcham <- rename(pcds_2_patcham, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_patcham_walk_bus", value=pcds_2_patcham, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_patcham = inner_join(bn_pcds_r5r, pcds_2_patcham, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -696,7 +696,7 @@ pcds_2_cardinal_n = aggregate(ttm_brighton_pcds_2_cardinal_n$travel_time_p50, by
 pcds_2_cardinal_n <- rename(pcds_2_cardinal_n, id = Group.1) 
 pcds_2_cardinal_n <- rename(pcds_2_cardinal_n, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_cardinal_n_walk_bus", value=pcds_2_cardinal_n, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_cardinal_n = inner_join(bn_pcds_r5r, pcds_2_cardinal_n, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -760,7 +760,7 @@ pcds_2_blatchington = aggregate(ttm_brighton_pcds_2_blatchington$travel_time_p50
 pcds_2_blatchington <- rename(pcds_2_blatchington, id = Group.1) 
 pcds_2_blatchington <- rename(pcds_2_blatchington, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_blatchington_walk_bus", value=pcds_2_blatchington, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_blatchington = inner_join(bn_pcds_r5r, pcds_2_blatchington, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -824,7 +824,7 @@ pcds_2_hove_park = aggregate(ttm_brighton_pcds_2_hove_park$travel_time_p50, by=l
 pcds_2_hove_park <- rename(pcds_2_hove_park, id = Group.1) 
 pcds_2_hove_park <- rename(pcds_2_hove_park, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_hove_park_walk_bus", value=pcds_2_hove_park, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_hove_park = inner_join(bn_pcds_r5r, pcds_2_hove_park, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -888,7 +888,7 @@ pcds_2_kings = aggregate(ttm_brighton_pcds_2_kings$travel_time_p50, by=list(ttm_
 pcds_2_kings <- rename(pcds_2_kings, id = Group.1) 
 pcds_2_kings <- rename(pcds_2_kings, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_kings_walk_bus", value=pcds_2_kings, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_kings = inner_join(bn_pcds_r5r, pcds_2_kings, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -952,7 +952,7 @@ pcds_2_paca = aggregate(ttm_brighton_pcds_2_paca$travel_time_p50, by=list(ttm_br
 pcds_2_paca <- rename(pcds_2_paca, id = Group.1) 
 pcds_2_paca <- rename(pcds_2_paca, time = x)
 
-#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_paca_walk_bus", value=pcds_2_paca, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
 
 pcds_geo_paca = inner_join(bn_pcds_r5r, pcds_2_paca, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
