@@ -75,20 +75,22 @@ bn_pcds_r5r <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>%
   select(c("pcds","lat", "long")) %>% 
   rename("id" = "pcds", "lon" = "long")
 
+#dbWriteTable(con, name="brighton_sec_schools", value=brighton_sec_schools, overwrite=TRUE)
+
 ```
 
-#dbWriteTable(con, name="brighton_sec_schools", value=brighton_sec_schools, overwrite=TRUE)
+
 
 ```{r, r5r-initial-setup, warning=FALSE, message=FALSE, echo=FALSE}
 
 data_path = here("data", "r5rBrighton")
 # Check what files we have
 #list.files(data_path)
-rJavaEnv::java_check_version_rjava()
+#rJavaEnv::java_check_version_rjava()
 # Allow 30 GiB of memory
 options(java.parameters = "-Xmx30G")
 rJava::.jinit()
-rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
 
 
 r5r_core <- setup_r5(data_path = data_path)
@@ -198,9 +200,9 @@ det <- detailed_itineraries(r5r_core = r5r_core,
                             max_walk_time = max_walk_time,
                             shortest_path = T)
 
-head(det)
+#head(det)
 
-write_csv(det, here("data", "detail_itinerary_sample.csv"))
+#write_csv(det, here("data", "detail_itinerary_sample.csv"))
 
 tmap_mode("view")  # Set the mode to interactive viewing
 
