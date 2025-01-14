@@ -1,0 +1,200 @@
+---
+title: "Varndean"
+author: "Adam Dennett"
+---
+
+```{r Setup-Libraries, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
+library(tidyr)
+library(dplyr)
+library(writexl)
+library(tidyverse)
+library(here) 
+library(janitor)
+library(sf)
+library(usethis)
+library(tmap)
+library(readxl)
+library(r5r)
+library(RColorBrewer)
+library(accessibility)
+library(data.table)
+library(ggplot2)
+library(interp)
+library(h3jsr)
+library(h3r)
+library(osmextract)
+library(stplanr)
+library(od)
+library(tidytransit)
+library(gtsf)
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(rpostgis)
+```
+
+```{r Connect-to-Database, warning=FALSE, message=FALSE, echo=FALSE}
+#connect to a local database to store some data later on
+con <- dbConnect(RPostgres::Postgres(), 
+                 dbname = 'gisdb2',
+                 host = 'localhost',
+                 port = 5432,
+                 user = 'postgres',
+                 password = 'postgres',
+                 sslmode = 'disable')
+
+#check connection
+#dbListTables(con)
+```
+
+```{r get-schools-info, warning=FALSE, message=FALSE, echo=FALSE}
+#Fix the school and school data so r5 can handle it
+#schools first
+
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700) %>% 
+  st_transform(4326) %>% 
+  st_set_crs(4326)
+
+bh_sec_sch <- brighton_sec_schools %>% 
+  select(urn, establishment_name, geometry) %>%
+  rename(id = urn)
+
+coords <- st_coordinates(bh_sec_sch)
+bh_sec_sch$lon <- coords[, 1]
+bh_sec_sch$lat <- coords[, 2]
+
+#get postcode centroids as origins
+bn_pcds_r5r <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>% 
+  filter(oslaua == "E06000043") %>%
+  select(c("pcds","lat", "long")) %>% 
+  rename("id" = "pcds", "lon" = "long")
+
+#dbWriteTable(con, name="brighton_sec_schools", value=brighton_sec_schools, overwrite=TRUE)
+
+```
+
+
+
+```{r, r5r-initial-setup, warning=FALSE, message=FALSE, echo=FALSE}
+
+data_path = here("data", "r5rBrighton")
+# Check what files we have
+#list.files(data_path)
+#rJavaEnv::java_check_version_rjava()
+# Allow 30 GiB of memory
+options(java.parameters = "-Xmx30G")
+rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+
+
+r5r_core <- setup_r5(data_path = data_path)
+
+```
+
+
+Travel Times to Varndean at 7:30 am on 1/12/22 from BN Postcodes
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114579")
+
+mode = c("WALK", "Transit")
+max_walk_time = 60
+max_trip_duration = 120
+departure_datetime = as.POSIXct("01-12-2022 7:30:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+  
+ttm_brighton_pcds_2_varndean = travel_time_matrix(r5r_core = r5r_core,
+                          origins = bn_pcds_r5r,
+                          destinations = bh_sec_sch1,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+pcds_2_varndean = aggregate(ttm_brighton_pcds_2_varndean$travel_time_p50, by=list(ttm_brighton_pcds_2_varndean$from_id), FUN=min, na.rm=TRUE)
+
+pcds_2_varndean <- rename(pcds_2_varndean, id = Group.1) 
+pcds_2_varndean <- rename(pcds_2_varndean, time = x)
+
+pcds_geo_varndean = inner_join(bn_pcds_r5r, pcds_2_varndean, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_varndean$time <- as.numeric(pcds_geo_varndean$time)
+pcds_geo_varndean$color <- ifelse(pcds_geo_varndean$time >= 75, "black", NA)
+
+dbWriteTable(con, name="pcds_geo_varndean_walk_bus", value=pcds_geo_varndean, overwrite=TRUE)
+
+tmap_mode("view")
+tm_shape(pcds_geo_varndean) + 
+  tm_symbols(col = "time", size = 0.5, border.lwd = 0, style = "fixed", breaks = c(0, 15, 30, 45, 60, 75, 120), palette = "-magma", alpha = 0.3) + 
+  tm_layout(legend.title.size = 1.5) +
+tm_shape(bh_sec_sch1) +
+  tm_dots(col = "black", border.lwd = 0) + 
+  tm_layout(title = "Bus / Walk Travel Time (incorporating waiting)", legend.position = c("left", "bottom"))
+
+#r5r::stop_r5(r5r_core)
+#rJava::.jgc(R.gc = TRUE)
+
+```
+
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+# set inputs
+origins = bn_pcds_r5r %>% filter(id == "BN2 5QN") 
+destinations = bh_sec_sch1
+
+#rJava::.jinit()
+#rJava::.jcall("java.lang.System", "S", "getProperty", "java.version")
+#options(java.parameters = "-Xmx30G")
+
+#data_path = here("data")
+#data_path = here("data", "r5rBrighton")
+#r5r_core <- setup_r5(data_path = data_path)
+
+#origins <- poi[10,]
+#destinations <- poi[12,]
+mode = c("WALK", "TRANSIT")
+max_walk_time = 30 # minutes
+max_trip_duration = 120 # minutes
+departure_datetime = as.POSIXct("01-12-2022 7:30:00",
+                                 format = "%d-%m-%Y %H:%M:%S")
+
+##calc expanded ttm
+ettm <- expanded_travel_time_matrix(r5r_core = r5r_core,
+                          origins = origins,
+                          destinations = destinations,
+                          mode = mode,
+                          departure_datetime = departure_datetime,
+                          breakdown = TRUE,
+                          max_walk_time = max_walk_time,
+                          max_trip_duration = max_trip_duration)
+
+
+# calculate detailed itineraries
+det <- detailed_itineraries(r5r_core = r5r_core,
+                            origins = origins,
+                            destinations = destinations,
+                            mode = mode,
+                            departure_datetime = departure_datetime,
+                            max_walk_time = max_walk_time,
+                            shortest_path = T)
+
+#head(det)
+
+#write_csv(det, here("data", "detail_itinerary_sample.csv"))
+
+tmap_mode("view")  # Set the mode to interactive viewing
+
+tm_shape(det) +
+  tm_lines(col = "mode", palette = "-viridis", lwd = 2, alpha = 0.7, title.col = "Segment")
+```
