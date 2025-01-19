@@ -1,7 +1,8 @@
 ---
-title: "free_bus_pt2"
+title: "free_bus_pt3"
 author: "Adam Dennett"
 ---
+
 
 ```{r Setup-Libraries, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
 library(tidyr)
@@ -38,7 +39,6 @@ memory.limit(size = 32000)  # Increase to 16 GB
 
 ```
 
-
 ```{r get-schools-info, warning=FALSE, message=FALSE, echo=FALSE}
 # Read the GeoPackage
 BN_pcds_to_school_dist <- st_read("data/BN_pcds_to_school_dist.gpkg") %>%   st_transform(4326)
@@ -63,64 +63,29 @@ bh_sec_sch$lat <- coords[, 2]
 
 ```
 
-## Dorothy Stringer - Free Travel Area
+## Blatchington Mill - Free Travel Area
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-# Dorothy Stringer School (114580)
-bh_sec_sch_114580 <- bh_sec_sch %>% filter(id == "114580")
+# Blatchington Mill School (114606)
+bh_sec_sch_114606 <- bh_sec_sch %>% filter(id == "114606")
 
 subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
 subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
 
-stringer_bus_cost <- subset_cost %>% filter(destination_id == 114580)
-stringer_bus_free <- subset_free %>% filter(destination_id == 114580)
+blatchington_bus_cost <- subset_cost %>% filter(destination_id == 114606)
+blatchington_bus_free <- subset_free %>% filter(destination_id == 114606)
 
-map_stringer <- leaflet() %>% 
+map_blatchington <- leaflet() %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
-  addPolylines(data = stringer_bus_free, 
-               color = "#9e0142",
-               weight = 2, 
-               opacity = 0.3) %>%
-  addPolylines(data = stringer_bus_cost, 
-               color = "#3288bd", 
-               weight = 2, 
-               opacity = 0.3) %>%
-  addCircleMarkers(data = bh_sec_sch_114580, 
-                   ~lon, ~lat, 
-                   color = "black", 
-                   radius = 4,  
-                   weight = 2,  
-                   fillOpacity = 1,
-                   popup = ~establishment_name)
-
-map_stringer
-
-
-```
-
-## Patcham - Free Travel Area
-
-```{r warning=FALSE, message=FALSE, echo=FALSE}
-# Patcham High School (114608)
-bh_sec_sch_114608 <- bh_sec_sch %>% filter(id == "114608")
-
-subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
-subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
-
-patcham_bus_cost <- subset_cost %>% filter(destination_id == 114608)
-patcham_bus_free <- subset_free %>% filter(destination_id == 114608)
-
-map_patcham <- leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
-  addPolylines(data = patcham_bus_free, 
+  addPolylines(data = blatchington_bus_free, 
                color = "#9e0142", 
                weight = 2, 
                opacity = 0.3) %>%
-  addPolylines(data = patcham_bus_cost, 
+  addPolylines(data = blatchington_bus_cost, 
                color = "#3288bd", 
                weight = 2, 
                opacity = 0.3) %>%
-  addCircleMarkers(data = bh_sec_sch_114608, 
+  addCircleMarkers(data = bh_sec_sch_114606, 
                    ~lon, ~lat, 
                    color = "black", 
                    radius = 4,  
@@ -128,33 +93,33 @@ map_patcham <- leaflet() %>%
                    fillOpacity = 1,
                    popup = ~establishment_name)
 
-map_patcham
+map_blatchington
 
 ```
 
-## Cardinal Newman - Free Travel Area
+## Hove Park - Free Travel Area
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-# Cardinal Newman Catholic School (114611)
-bh_sec_sch_114611 <- bh_sec_sch %>% filter(id == "114611")
+# Hove Park School and Sixth Form Centre (114607)
+bh_sec_sch_114607 <- bh_sec_sch %>% filter(id == "114607")
 
 subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
 subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
 
-newman_bus_cost <- subset_cost %>% filter(destination_id == 114611)
-newman_bus_free <- subset_free %>% filter(destination_id == 114611)
+hovepark_bus_cost <- subset_cost %>% filter(destination_id == 114607)
+hovepark_bus_free <- subset_free %>% filter(destination_id == 114607)
 
-map_newman <- leaflet() %>% 
+map_hovepark <- leaflet() %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
-  addPolylines(data = newman_bus_free, 
+  addPolylines(data = hovepark_bus_free, 
                color = "#9e0142", 
                weight = 2, 
                opacity = 0.3) %>%
-  addPolylines(data = newman_bus_cost, 
+  addPolylines(data = hovepark_bus_cost, 
                color = "#3288bd", 
                weight = 2, 
                opacity = 0.3) %>%
-  addCircleMarkers(data = bh_sec_sch_114611, 
+  addCircleMarkers(data = bh_sec_sch_114607, 
                    ~lon, ~lat, 
                    color = "black", 
                    radius = 4,  
@@ -162,7 +127,75 @@ map_newman <- leaflet() %>%
                    fillOpacity = 1,
                    popup = ~establishment_name)
 
-map_newman
+map_hovepark
+
+```
+
+## Kings School - Free Travel Area
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+# King's School (139409)
+bh_sec_sch_139409 <- bh_sec_sch %>% filter(id == "139409")
+
+subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
+subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
+
+kings_bus_cost <- subset_cost %>% filter(destination_id == 139409)
+kings_bus_free <- subset_free %>% filter(destination_id == 139409)
+
+map_kings <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolylines(data = kings_bus_free, 
+               color = "#9e0142", 
+               weight = 2, 
+               opacity = 0.3) %>%
+  addPolylines(data = kings_bus_cost, 
+               color = "#3288bd", 
+               weight = 2, 
+               opacity = 0.3) %>%
+  addCircleMarkers(data = bh_sec_sch_139409, 
+                   ~lon, ~lat, 
+                   color = "black", 
+                   radius = 4,  
+                   weight = 2,  
+                   fillOpacity = 1,
+                   popup = ~establishment_name)
+
+map_kings
+
+```
+
+## PACA - Free Travel Area
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+# Portslade Aldridge Community Academy (137063)
+bh_sec_sch_137063 <- bh_sec_sch %>% filter(id == "137063")
+
+subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
+subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
+
+paca_bus_cost <- subset_cost %>% filter(destination_id == 137063)
+paca_bus_free <- subset_free %>% filter(destination_id == 137063)
+
+map_paca <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolylines(data = paca_bus_free, 
+               color = "#9e0142", 
+               weight = 2, 
+               opacity = 0.3) %>%
+  addPolylines(data = paca_bus_cost, 
+               color = "#3288bd", 
+               weight = 2, 
+               opacity = 0.3) %>%
+  addCircleMarkers(data = bh_sec_sch_137063, 
+                   ~lon, ~lat, 
+                   color = "black", 
+                   radius = 4,  
+                   weight = 2,  
+                   fillOpacity = 1,
+                   popup = ~establishment_name)
+
+map_paca
 
 ```
 
