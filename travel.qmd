@@ -455,7 +455,7 @@ pcds_2_varndean = aggregate(ttm_brighton_pcds_2_varndean$travel_time_p50, by=lis
 pcds_2_varndean <- rename(pcds_2_varndean, id = Group.1) 
 pcds_2_varndean <- rename(pcds_2_varndean, time = x)
 
-dbWriteTable(con, name="pcds_2_varndean_walk_bus", value=pcds_2_varndean, overwrite=TRUE)#pcds_closest_1["id"] = as.integer(pcds_closest_1$id)
+dbWriteTable(con, name="pcds_2_varndean_walk_bus", value=pcds_2_varndean, overwrite=TRUE)
 
 pcds_geo_varndean = inner_join(bn_pcds_r5r, pcds_2_varndean, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 

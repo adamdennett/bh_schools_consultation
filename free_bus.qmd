@@ -1,0 +1,199 @@
+---
+title: "free_bus"
+author: "Adam Dennett"
+---
+
+```{r Setup-Libraries, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
+library(tidyr)
+library(dplyr)
+library(writexl)
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(usethis)
+library(tmap)
+library(readxl)
+library(r5r)
+library(RColorBrewer)
+library(accessibility)
+library(data.table)
+library(ggplot2)
+library(interp)
+library(h3jsr)
+library(h3r)
+library(osmextract)
+library(stplanr)
+library(od)
+library(tidytransit)
+library(gtsf)
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(rpostgis)
+library(leaflet)
+library(dplyr)
+
+memory.limit(size = 32000)  # Increase to 16 GB
+
+```
+
+# Free Bus Travel
+
+The Government Publishes very clear rules on who is eligible for free travel to school.
+
+The latest revision of the guidelines was pubished in 2024 and can be read here.
+
+<https://assets.publishing.service.gov.uk/media/659d7ebb0dd0a200138b612a/Travel_to_school_for_children_of_compulsory_school_age.pdf>
+
+And refers to the legal guidelines on statutory walking distances prescribed by section 444(5) of the Education Act 1996 - <https://www.legislation.gov.uk/ukpga/1996/56/section/444>.
+
+The guidelines state:
+
+> 9.  The statutory walking distances are used to determine whether a child is eligible for free travel to school. They are the distance beyond which a child who is attending their nearest suitable school is eligible for free travel arranged by their local authority. Where a child lives within the statutory walking distance (and is not eligible for free travel on any of the other grounds set out in this guidance) the parent is responsible for arranging their child’s travel to school. There is no expectation that the child will walk. It is for the parent to determine what arrangements would be suitable for their child.
+> 10. A child under the age of 8 is eligible for free travel to their nearest suitable school if it is more than 2 miles (3.22km) from their home.
+> 11. **A child aged 8 years or over is eligible for free travel to their nearest suitable school if it is more than 3 miles (4.83km) from their home.**
+> 12. When a local authority assesses whether the distance between a child’s home and their school is further than the statutory walking distance, **the route they measure must be the shortest route along which a child, accompanied as necessary, may walk in reasonable safety**. This is not necessarily the shortest distance by road. The route may also include footpaths, bridleways, other pathways and alternative entrances to the school (see paragraph 49 to 54 for guidance about accompaniment).
+
+This means that the Council should be providing free bus travel to a lot of school children already in Brighton. And under the new proposals, a lot more. We can look at the free areas (and then everywhere else) surrounding each school in the city.
+
+## Longhill - Free Travel Area
+
+Everybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.
+
+If your child travels to school from outside of this blue area, then the council should be paying for their transport.
+
+```{r get-schools-info, warning=FALSE, message=FALSE, echo=FALSE}
+# Read the GeoPackage
+BN_pcds_to_school_dist <- st_read("data/BN_pcds_to_school_dist.gpkg") %>%   st_transform(4326)
+
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700) %>% 
+  st_transform(4326) %>% 
+  st_set_crs(4326)
+
+bh_sec_sch <- brighton_sec_schools %>% 
+  select(urn, establishment_name, geometry) %>%
+  rename(id = urn)
+
+coords <- st_coordinates(bh_sec_sch)
+bh_sec_sch$lon <- coords[, 1]
+bh_sec_sch$lat <- coords[, 2]
+
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch_114581 <- bh_sec_sch %>% 
+  filter(id == "114581")
+
+# Assuming bn_pcds_r5r is already loaded with 'lon' and 'lat' columns
+
+subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
+subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
+
+#Longhill 114581
+
+longhill_bus_cost <- subset_cost %>% filter(destination_id == 114581)
+longhill_bus_free <- subset_free %>% filter(destination_id == 114581)
+
+map <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolylines(data = longhill_bus_free, 
+               color = "#9e0142", 
+               weight = 2, 
+               opacity = 0.3) %>%
+  addPolylines(data = longhill_bus_cost, 
+               color = "#3288bd", 
+               weight = 2, 
+               opacity = 0.3) %>%# Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch_114581, 
+                   ~lon, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name)
+
+map
+
+```
+
+## BACA - Free Travel Area
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch_136164 <- bh_sec_sch %>% 
+  filter(id == "136164")
+
+# Assuming bn_pcds_r5r is already loaded with 'lon' and 'lat' columns
+
+subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
+subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
+
+baca_bus_cost <- subset_cost %>% filter(destination_id == 136164)
+baca_bus_free <- subset_free %>% filter(destination_id == 136164)
+
+map <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolylines(data = baca_bus_free, 
+               color = "#9e0142",  
+               weight = 2, 
+               opacity = 0.3) %>%
+  addPolylines(data = baca_bus_cost, 
+               color = "#3288bd", 
+               weight = 2, 
+               opacity = 0.3) %>%# Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch_136164, 
+                   ~lon, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name)
+
+map
+
+```
+
+## Vardean - Free Travel Area
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch_114579 <- bh_sec_sch %>% 
+  filter(id == "114579")
+
+# Assuming bn_pcds_r5r is already loaded with 'lon' and 'lat' columns
+
+subset_cost <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
+subset_free <- BN_pcds_to_school_dist %>% filter(total_cost > 4828.03)
+
+#Longhill 114581
+
+varndean_bus_cost <- subset_cost %>% filter(destination_id == 114579)
+varndean_bus_free <- subset_free %>% filter(destination_id == 114579)
+
+map <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolylines(data = varndean_bus_free, 
+               color = "#9e0142",   
+               weight = 2, 
+               opacity = 0.3) %>%
+  addPolylines(data = varndean_bus_cost, 
+               color = "#3288bd", 
+               weight = 2, 
+               opacity = 0.3) %>%# Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch_114579, 
+                   ~lon, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name)
+
+map
+
+```
+
