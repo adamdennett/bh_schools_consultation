@@ -774,5 +774,71 @@
       "Maps",
       "Detailed, Zoomable Consultation Catchment Maps"
     ]
+  },
+  {
+    "objectID": "travel_maps.html",
+    "href": "travel_maps.html",
+    "title": "Travel Maps",
+    "section": "",
+    "text": "To carry out an accessibility analysis, information on the full road network in Brighton and Hove is required. This was obtained from Open Street Map using the osmextract package in R.\nThe r5r package - https://ipeagit.github.io/r5r/ - was used to calculate the travel times between all of the postcodes and Schools in Brighton and Hove by foot and/or bus (whichever was quicker)\nBus times were estimated from the Brighton and Hove Buses GTFS feed (all published stops and times for 01-12-2022) - This date was chosen as a term-time date and, more importantly, was a file I could actually get r5r to read properly! https://www.buses.co.uk/open-data\nNote the the travel time for Longhill is earlier than all the other schools as it starts earlier due to its bus situation. Buses that run to the school at this time are captured in these travel times.",
+    "crumbs": [
+      "Maps",
+      "Travel Maps"
+    ]
+  },
+  {
+    "objectID": "travel_maps.html#first-closest-schools",
+    "href": "travel_maps.html#first-closest-schools",
+    "title": "Travel Maps",
+    "section": "First Closest Schools",
+    "text": "First Closest Schools",
+    "crumbs": [
+      "Maps",
+      "Travel Maps"
+    ]
+  },
+  {
+    "objectID": "travel_maps.html#second-closest-schools",
+    "href": "travel_maps.html#second-closest-schools",
+    "title": "Travel Maps",
+    "section": "Second Closest Schools",
+    "text": "Second Closest Schools",
+    "crumbs": [
+      "Maps",
+      "Travel Maps"
+    ]
+  },
+  {
+    "objectID": "travel_maps.html#third-closest-schools",
+    "href": "travel_maps.html#third-closest-schools",
+    "title": "Travel Maps",
+    "section": "Third Closest Schools",
+    "text": "Third Closest Schools",
+    "crumbs": [
+      "Maps",
+      "Travel Maps"
+    ]
+  },
+  {
+    "objectID": "travel_maps.html#longhill",
+    "href": "travel_maps.html#longhill",
+    "title": "Travel Maps",
+    "section": "Longhill",
+    "text": "Longhill\nEverybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.\n\n\nCode\nlibrary(sf)\nlibrary(dplyr)\n\n# Read the GeoPackage\nBN_pcds_to_school_dist &lt;- st_read(\"data/BN_pcds_to_school_dist.gpkg\") %&gt;% \n  st_transform(4326)\n\n\nReading layer `BN_pcds_to_school_dist' from data source \n  `E:\\BH_Schools_Consultation\\data\\BN_pcds_to_school_dist.gpkg' \n  using driver `GPKG'\nSimple feature collection with 104740 features and 6 fields (with 371 geometries empty)\nGeometry type: LINESTRING\nDimension:     XY\nBounding box:  xmin: 524231.1 ymin: 101905.6 xmax: 539243.1 ymax: 111008\nProjected CRS: OSGB36 / British National Grid\n\n\nCode\n# Assuming bn_pcds_r5r is already loaded with 'lon' and 'lat' columns\n\n\n\n\nCode\nsubset_data &lt;- BN_pcds_to_school_dist %&gt;% filter(total_cost &lt; 4828.03)\n\n\n\n\nCode\n#Longhill 114581\n\nlonghill_bus_free &lt;- subset_data %&gt;% filter(destination_id == 114581)\n\n\n\n\nCode\nmap &lt;- leaflet() %&gt;% \n  addProviderTiles(providers$CartoDB.Positron) %&gt;% \n  addPolylines(data = longhill_bus_free, \n               color = \"blue\", \n               weight = 2, \n               opacity = 0.5)\n\nmap",
+    "crumbs": [
+      "Maps",
+      "Travel Maps"
+    ]
+  },
+  {
+    "objectID": "travel_maps.html#longhill---free-travel-area",
+    "href": "travel_maps.html#longhill---free-travel-area",
+    "title": "Travel Maps",
+    "section": "Longhill - Free Travel Area",
+    "text": "Longhill - Free Travel Area\nEverybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.\n\n\nReading layer `BN_pcds_to_school_dist' from data source \n  `E:\\BH_Schools_Consultation\\data\\BN_pcds_to_school_dist.gpkg' \n  using driver `GPKG'\nSimple feature collection with 104740 features and 6 fields (with 371 geometries empty)\nGeometry type: LINESTRING\nDimension:     XY\nBounding box:  xmin: 524231.1 ymin: 101905.6 xmax: 539243.1 ymax: 111008\nProjected CRS: OSGB36 / British National Grid",
+    "crumbs": [
+      "Maps",
+      "Travel Maps"
+    ]
   }
 ]

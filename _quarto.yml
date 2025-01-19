@@ -7,6 +7,7 @@ project:
     - consultation_factsheet.qmd
     - about.qmd
     - catchment_map.qmd
+    - travel_maps.qmd
 
 website:
   title: "Brighton and Hove Secondary Schools Consultation Evidence"
@@ -27,6 +28,7 @@ website:
       - section: "Maps"
         contents:
           - catchment_map.qmd
+          - travel_maps.qmd
         
     tools:
       - icon: person-circle

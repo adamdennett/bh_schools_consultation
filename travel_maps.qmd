@@ -1,0 +1,868 @@
+---
+title: "Travel Maps"
+author: "Adam Dennett"
+---
+
+```{r Setup-Libraries, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, include=FALSE, results='hide'}
+library(tidyr)
+library(dplyr)
+library(writexl)
+library(tidyverse)
+library(here)
+library(janitor)
+library(sf)
+library(usethis)
+library(tmap)
+library(readxl)
+library(r5r)
+library(RColorBrewer)
+library(accessibility)
+library(data.table)
+library(ggplot2)
+library(interp)
+library(h3jsr)
+library(h3r)
+library(osmextract)
+library(stplanr)
+library(od)
+library(tidytransit)
+library(gtsf)
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(rpostgis)
+library(leaflet)
+library(dplyr)
+```
+
+```{r Connect-to-Database, warning=FALSE, message=FALSE, echo=FALSE}
+#connect to a local database to store some data later on
+con <- dbConnect(RPostgres::Postgres(), 
+                 dbname = 'gisdb2',
+                 host = 'localhost',
+                 port = 5432,
+                 user = 'postgres',
+                 password = 'postgres',
+                 sslmode = 'disable')
+
+#check connection
+#dbListTables(con)
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+#get postcode centroids as origins
+bn_pcds_r5r <- read_csv(here("data", "ONSPD_FEB_2024_UK_BN.csv")) %>% 
+  filter(oslaua == "E06000043") %>%
+  select(c("pcds","lat", "long")) %>% 
+  rename("id" = "pcds", "lon" = "long")
+
+```
+
+```{r get-schools-info, warning=FALSE, message=FALSE, echo=FALSE}
+#Fix the school and school data so r5 can handle it
+#schools first
+
+brighton_sec_schools <- read_csv("https://www.dropbox.com/scl/fi/fhzafgt27v30lmmuo084y/edubasealldata20241003.csv?rlkey=uorw43s44hnw5k9js3z0ksuuq&raw=1") %>% 
+  clean_names() %>% 
+  filter(la_name == "Brighton and Hove") %>% 
+  filter(phase_of_education_name == "Secondary") %>% 
+  filter(establishment_status_name == "Open") %>%
+  st_as_sf(., coords = c("easting", "northing")) %>% 
+  st_set_crs(27700) %>% 
+  st_transform(4326) %>% 
+  st_set_crs(4326)
+
+bh_sec_sch <- brighton_sec_schools %>% 
+  select(urn, establishment_name, geometry) %>%
+  rename(id = urn)
+
+coords <- st_coordinates(bh_sec_sch)
+bh_sec_sch$lon <- coords[, 1]
+bh_sec_sch$lat <- coords[, 2]
+
+
+dbWriteTable(con, name="brighton_sec_schools", value=brighton_sec_schools, overwrite=TRUE)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+pcds_2_longhill <- dbReadTable(con, name="pcds_2_longhill_walk_bus")
+pcds_2_baca <- dbReadTable(con, name="pcds_2_baca_walk_bus")
+pcds_2_varndean <- dbReadTable(con, name="pcds_2_varndean_walk_bus")
+pcds_2_ds <- dbReadTable(con, name="pcds_2_ds_walk_bus")
+pcds_2_patcham <- dbReadTable(con, name="pcds_2_patcham_walk_bus")
+pcds_2_cardinal_n <- dbReadTable(con, name="pcds_2_cardinal_n_walk_bus")
+pcds_2_kings <- dbReadTable(con, name="pcds_2_kings_walk_bus")
+pcds_2_hove_park <- dbReadTable(con, name="pcds_2_hove_park_walk_bus")
+pcds_2_blatchington <- dbReadTable(con, name="pcds_2_blatchington_walk_bus")
+pcds_2_paca <- dbReadTable(con, name="pcds_2_paca_walk_bus")
+
+```
+
+```{r error=FALSE, message=FALSE, warning=FALSE}
+#| include: false
+#pick a destination school
+
+# URN    School
+# 114579 Varndean School
+# 114580 Dorothy Stringer School
+# 114581 Longhill High School 
+# 114606 Blatchington Mill School
+# 114607 Hove Park School and Sixth Form Centre
+# 114608 Patcham High School
+# 114611 Cardinal Newman Catholic School
+# 136164 Brighton Aldridge Community Academy
+# 137063 Portslade Aldridge Community Academy
+# 139409 King's School 
+
+
+optionZ <- st_read(here("data","optionZa.geojson")) %>% 
+  st_transform(4326)
+```
+
+# School Accessibility
+
+To carry out an accessibility analysis, information on the full road network in Brighton and Hove is required. This was obtained from Open Street Map using the `osmextract` package in R.
+
+The `r5r` package - <https://ipeagit.github.io/r5r/> - was used to calculate the travel times between all of the postcodes and Schools in Brighton and Hove by foot and/or bus (whichever was quicker)
+
+Bus times were estimated from the Brighton and Hove Buses GTFS feed (all published stops and times for 01-12-2022) - This date was chosen as a term-time date and, more importantly, was a file I could actually get r5r to read properly! <https://www.buses.co.uk/open-data>
+
+Note the the travel time for Longhill is earlier than all the other schools as it starts earlier due to its bus situation. Buses that run to the school at this time are captured in these travel times.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+##longhill
+pcds_geo_longhill = inner_join(bn_pcds_r5r, pcds_2_longhill, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_longhill$time <- as.numeric(pcds_geo_longhill$time)
+pcds_geo_longhill$color <- ifelse(pcds_geo_longhill$time >= 75, "black", NA)
+
+##baca
+pcds_geo_baca = inner_join(bn_pcds_r5r, pcds_2_baca, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_baca$time <- as.numeric(pcds_geo_baca$time)
+pcds_geo_baca$color <- ifelse(pcds_geo_baca$time >= 75, "black", NA)
+
+#vardean
+pcds_geo_varndean = inner_join(bn_pcds_r5r, pcds_2_varndean, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_varndean$time <- as.numeric(pcds_geo_varndean$time)
+pcds_geo_varndean$color <- ifelse(pcds_geo_varndean$time >= 75, "black", NA)
+
+#stringer
+pcds_geo_ds = inner_join(bn_pcds_r5r, pcds_2_ds, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_ds$time <- as.numeric(pcds_geo_ds$time)
+pcds_geo_ds$color <- ifelse(pcds_geo_ds$time >= 75, "black", NA)
+
+#patcham
+pcds_geo_patcham = inner_join(bn_pcds_r5r, pcds_2_patcham, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_patcham$time <- as.numeric(pcds_geo_patcham$time)
+pcds_geo_patcham$color <- ifelse(pcds_geo_patcham$time >= 75, "black", NA)
+
+#cardinal newman
+pcds_geo_cardinal_n = inner_join(bn_pcds_r5r, pcds_2_cardinal_n, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_cardinal_n$time <- as.numeric(pcds_geo_cardinal_n$time)
+pcds_geo_cardinal_n$color <- ifelse(pcds_geo_cardinal_n$time >= 75, "black", NA)
+
+#kings
+pcds_geo_kings = inner_join(bn_pcds_r5r, pcds_2_kings, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_kings$time <- as.numeric(pcds_geo_kings$time)
+pcds_geo_kings$color <- ifelse(pcds_geo_kings$time >= 75, "black", NA)
+
+#blatchington mill
+pcds_geo_blatchington = inner_join(bn_pcds_r5r, pcds_2_blatchington, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_blatchington$time <- as.numeric(pcds_geo_blatchington$time)
+pcds_geo_blatchington$color <- ifelse(pcds_geo_blatchington$time >= 75, "black", NA)
+
+#hove park
+pcds_geo_hove_park = inner_join(bn_pcds_r5r, pcds_2_hove_park, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_hove_park$time <- as.numeric(pcds_geo_hove_park$time)
+pcds_geo_hove_park$color <- ifelse(pcds_geo_hove_park$time >= 75, "black", NA)
+
+#paca
+pcds_geo_paca = inner_join(bn_pcds_r5r, pcds_2_paca, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+pcds_geo_paca$time <- as.numeric(pcds_geo_paca$time)
+pcds_geo_paca$color <- ifelse(pcds_geo_paca$time >= 75, "black", NA)
+```
+
+## Estimated Walk/Bus Travel to Longhill High School - 7.30am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114581")
+
+pcds_geo_longhill <- pcds_geo_longhill %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114581") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_longhill, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time), 
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_longhill$id, "<br>","Time",pcds_geo_longhill$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_longhill$time), 
+            values = pcds_geo_longhill$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to BACA - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "136164")
+
+pcds_geo_baca <- pcds_geo_baca %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "136164") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_baca, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time), 
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_baca$id, "<br>","Time",pcds_geo_baca$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_baca$time), 
+            values = pcds_geo_baca$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to Varndean School - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114579")
+
+pcds_geo_varndean <- pcds_geo_varndean %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114579") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_varndean, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_varndean$id, "<br>","Time",pcds_geo_varndean$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_varndean$time), 
+            values = pcds_geo_varndean$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to Dorothy Stringer School - 8.00am weekday (assuming entrance via Surrenden Road from the North)
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114580")
+
+pcds_geo_ds <- pcds_geo_ds %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114580") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_ds, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_ds$id, "<br>","Time",pcds_geo_ds$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_ds$time), 
+            values = pcds_geo_ds$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to Patcham High School - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114608")
+
+pcds_geo_patcham <- pcds_geo_patcham %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114608") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_patcham, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_patcham$id, "<br>","Time",pcds_geo_patcham$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_patcham$time), 
+            values = pcds_geo_patcham$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to Cardinal Newman - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114611")
+
+pcds_geo_cardinal_n <- pcds_geo_cardinal_n %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114611") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_cardinal_n, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_cardinal_n$id, "<br>","Time",pcds_geo_cardinal_n$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_cardinal_n$time), 
+            values = pcds_geo_cardinal_n$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to Kings School - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "139409")
+
+pcds_geo_kings <- pcds_geo_kings %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "139409") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_kings, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_kings$id, "<br>","Time",pcds_geo_kings$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_kings$time), 
+            values = pcds_geo_kings$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to Blatchington Mill School - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114606")
+
+pcds_geo_blatchington <- pcds_geo_blatchington %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114606") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_blatchington, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_blatchington$id, "<br>","Time",pcds_geo_blatchington$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_blatchington$time), 
+            values = pcds_geo_blatchington$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to Hove Park School - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114607")
+
+pcds_geo_hove_park <- pcds_geo_hove_park %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114607") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_hove_park, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_hove_park$id, "<br>","Time",pcds_geo_hove_park$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_hove_park$time), 
+            values = pcds_geo_hove_park$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Estimated Walk/Bus Travel to PACA - 8.00am weekday
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "137063")
+
+pcds_geo_paca <- pcds_geo_paca %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "137063") %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%  # Plain basemap
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = pcds_geo_paca, 
+                   ~long, ~lat, 
+                   color = ~colorNumeric(rev(viridis::magma(256)), time)(time),
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = paste("Postcode",pcds_geo_paca$id, "<br>","Time",pcds_geo_paca$time,"<br>")) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%  
+  addLegend(position = "bottomleft", 
+            pal = colorNumeric(rev(viridis::magma(256)), pcds_geo_paca$time), 
+            values = pcds_geo_paca$time, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+
+# Renaming the 'time' column in each dataframe
+pcds_2_baca <- pcds_2_baca %>% rename(time_baca = time)
+pcds_2_blatchington <- pcds_2_blatchington %>% rename(time_blatchington = time)
+pcds_2_cardinal_n <- pcds_2_cardinal_n %>% rename(time_cardinal_n = time)
+pcds_2_ds <- pcds_2_ds %>% rename(time_ds = time)
+pcds_2_hove_park <- pcds_2_hove_park %>% rename(time_hove_park = time)
+pcds_2_kings <- pcds_2_kings %>% rename(time_kings = time)
+pcds_2_longhill <- pcds_2_longhill %>% rename(time_longhill = time)
+pcds_2_paca <- pcds_2_paca %>% rename(time_paca = time)
+pcds_2_patcham <- pcds_2_patcham %>% rename(time_patcham = time)
+pcds_2_varndean <- pcds_2_varndean %>% rename(time_varndean = time)
+
+# Merging all dataframes by 'id'
+bn_pcds_sch_travel <- pcds_2_baca %>%
+  full_join(pcds_2_blatchington, by = "id") %>%
+  full_join(pcds_2_cardinal_n, by = "id") %>%
+  full_join(pcds_2_ds, by = "id") %>%
+  full_join(pcds_2_hove_park, by = "id") %>%
+  full_join(pcds_2_kings, by = "id") %>%
+  full_join(pcds_2_longhill, by = "id") %>%
+  full_join(pcds_2_paca, by = "id") %>%
+  full_join(pcds_2_patcham, by = "id") %>%
+  full_join(pcds_2_varndean, by = "id")
+
+# Display the combined dataframe
+#print(bn_pcds_sch_travel)
+
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+
+# Reshape the dataframe from wide to long format
+long_df <- bn_pcds_sch_travel %>%
+  pivot_longer(cols = starts_with("time_"), names_to = "school", values_to = "travel_time")
+
+# Find the columns with the smallest, second smallest, and third smallest values for each row
+closest_schools <- long_df %>%
+  group_by(id) %>%
+  arrange(travel_time) %>%
+  summarize(
+    first_closest_travel = first(school),
+    second_closest_travel = nth(school, 2),
+    third_closest_travel = nth(school, 3),
+    first_closest_time = first(travel_time),
+    second_closest_time = nth(travel_time, 2),
+    third_closest_time = nth(travel_time, 3),
+    max_travel = max(travel_time),
+    min_travel = min(travel_time),
+    avg_travel = mean(travel_time)
+  )
+
+# Remove 'time_' prefix from the values in the closest school columns
+closest_schools <- closest_schools %>%
+  mutate(
+    first_closest_travel = str_remove(first_closest_travel, "^time_"),
+    second_closest_travel = str_remove(second_closest_travel, "^time_"),
+    third_closest_travel = str_remove(third_closest_travel, "^time_")
+  )
+
+# Join the closest schools data back to the original dataframe
+bn_pcds_sch_travel <- bn_pcds_sch_travel %>%
+  left_join(closest_schools, by = "id")
+
+
+bn_pcds_sch_travel = inner_join(bn_pcds_r5r, bn_pcds_sch_travel, by="id") %>% 
+  st_as_sf(coords = c("lon", "lat")) %>% 
+  st_set_crs(4326)
+
+#write_csv(bn_pcds_sch_travel, here("data", "bn_pcds_sch_travel.csv"))
+
+```
+
+# Closest Schools by walk/bus travel time
+
+## First Closest Schools
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+
+# Assuming bn_pcds_sch_travel and bh_sec_sch are sf objects
+bn_pcds_sch_travel <- bn_pcds_sch_travel %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+bh_sec_sch <- bh_sec_sch %>%
+  mutate(long = st_coordinates(geometry)[, 1],
+         lat = st_coordinates(geometry)[, 2])
+
+
+# Define the color palette for categorical data
+pal_first_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$first_closest_travel)
+
+# Define the color palette for categorical data
+pal_first_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$first_closest_travel)
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = bn_pcds_sch_travel, 
+                   ~long, ~lat, 
+                   color = ~pal_first_closest_travel(first_closest_travel), 
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = ~paste0("ID: ", id, "<br>Closest School: ", second_closest_travel, "(Travel Time)")) %>%
+  addCircleMarkers(data = bh_sec_sch, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4, 
+                   weight = 2, 
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%
+  addLegend(position = "bottomleft", 
+            pal = pal_first_closest_travel, 
+            values = bn_pcds_sch_travel$first_closest_travel, 
+            title = "Bus / Walk Travel Time (mins)")
+
+
+```
+
+## Second Closest Schools
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+# Define the color palette for categorical data
+pal_second_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$second_closest_travel)
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = bn_pcds_sch_travel, 
+                   bn_pcds_sch_travel$long, bn_pcds_sch_travel$lat, 
+                   color = ~pal_second_closest_travel(second_closest_travel), 
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = ~paste0("ID: ", id, "<br>Second closest School: ", second_closest_travel, "(Travel Time)")) %>%
+  addCircleMarkers(data = bh_sec_sch, 
+                   bh_sec_sch$long, bh_sec_sch$lat, 
+                   color = "black", 
+                   radius = 4, 
+                   weight = 2, 
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%
+  addLegend(position = "bottomleft", 
+            pal = pal_second_closest_travel, 
+            values = bn_pcds_sch_travel$second_closest_travel, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+## Third Closest Schools
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+# Define the color palette for categorical data
+pal_third_closest_travel <- colorFactor("Spectral", domain = bn_pcds_sch_travel$third_closest_travel)
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(data = optionZ, 
+              color = "grey", 
+              fillOpacity = 0) %>% 
+  addCircleMarkers(data = bn_pcds_sch_travel, 
+                   bn_pcds_sch_travel$long, bn_pcds_sch_travel$lat, 
+                   color = ~pal_second_closest_travel(third_closest_travel), 
+                   radius = 1, 
+                   opacity = 0.3, 
+                   fillOpacity = 0.3,
+                   popup = ~paste0("ID: ", id, "<br>Third closest School: ", second_closest_travel, "(Travel Time)")) %>%
+  addCircleMarkers(data = bh_sec_sch, 
+                   bh_sec_sch$long, bh_sec_sch$lat, 
+                   color = "black", 
+                   radius = 4, 
+                   weight = 2, 
+                   fillOpacity = 1,
+                   popup = ~establishment_name) %>%
+  addLegend(position = "bottomleft", 
+            pal = pal_third_closest_travel, 
+            values = bn_pcds_sch_travel$third_closest_travel, 
+            title = "Bus / Walk Travel Time (mins)")
+
+```
+
+# Free Bus Travel
+
+The Government Publishes very clear rules on who is eligible for free travel to school.
+
+The latest revision of the guidelines was pubished in 2024 and can be read here.
+
+<https://assets.publishing.service.gov.uk/media/659d7ebb0dd0a200138b612a/Travel_to_school_for_children_of_compulsory_school_age.pdf>
+
+And refers to the legal guidelines on statutory walking distances prescribed by section 444(5) of the Education Act 1996 - <https://www.legislation.gov.uk/ukpga/1996/56/section/444>.
+
+The guidelines state:
+
+> 9.  The statutory walking distances are used to determine whether a child is eligible for free travel to school. They are the distance beyond which a child who is attending their nearest suitable school is eligible for free travel arranged by their local authority. Where a child lives within the statutory walking distance (and is not eligible for free travel on any of the other grounds set out in this guidance) the parent is responsible for arranging their child’s travel to school. There is no expectation that the child will walk. It is for the parent to determine what arrangements would be suitable for their child.
+> 10. A child under the age of 8 is eligible for free travel to their nearest suitable school if it is more than 2 miles (3.22km) from their home.
+> 11. **A child aged 8 years or over is eligible for free travel to their nearest suitable school if it is more than 3 miles (4.83km) from their home.**
+> 12. When a local authority assesses whether the distance between a child’s home and their school is further than the statutory walking distance, **the route they measure must be the shortest route along which a child, accompanied as necessary, may walk in reasonable safety**. This is not necessarily the shortest distance by road. The route may also include footpaths, bridleways, other pathways and alternative entrances to the school (see paragraph 49 to 54 for guidance about accompaniment).
+
+This means that the Council should be providing free bus travel to a lot of school children already in Brighton. And under the new proposals, a lot more. We can look at the free areas (and then everywhere else) surrounding each school in the city.
+
+## Longhill - Free Travel Area
+
+Everybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+library(sf)
+library(dplyr)
+
+# Read the GeoPackage
+BN_pcds_to_school_dist <- st_read("data/BN_pcds_to_school_dist.gpkg") %>% 
+  st_transform(4326)
+
+# Assuming bn_pcds_r5r is already loaded with 'lon' and 'lat' columns
+
+subset_data <- BN_pcds_to_school_dist %>% filter(total_cost < 4828.03)
+
+#Longhill 114581
+
+longhill_bus_free <- subset_data %>% filter(destination_id == 114581)
+
+map <- leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolylines(data = longhill_bus_free, 
+               color = "blue", 
+               weight = 2, 
+               opacity = 0.5) %>%  # Display "id" on mouse-over
+  addCircleMarkers(data = bh_sec_sch1, 
+                   ~long, ~lat, 
+                   color = "black", 
+                   radius = 4,  # Increase radius for prominence
+                   weight = 2,  # Increase border weight
+                   fillOpacity = 1,
+                   popup = ~establishment_name)
+
+map
+
+```
+
