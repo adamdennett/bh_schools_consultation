@@ -835,7 +835,7 @@
     "href": "travel_maps.html#longhill---free-travel-area",
     "title": "Travel Maps",
     "section": "Longhill - Free Travel Area",
-    "text": "Longhill - Free Travel Area\nEverybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.\n\n\nReading layer `BN_pcds_to_school_dist' from data source \n  `E:\\BH_Schools_Consultation\\data\\BN_pcds_to_school_dist.gpkg' \n  using driver `GPKG'\nSimple feature collection with 104740 features and 6 fields (with 371 geometries empty)\nGeometry type: LINESTRING\nDimension:     XY\nBounding box:  xmin: 524231.1 ymin: 101905.6 xmax: 539243.1 ymax: 111008\nProjected CRS: OSGB36 / British National Grid",
+    "text": "Longhill - Free Travel Area\nEverybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.\nIf your child travels to school from outside of this blue area, then the council should be paying for their transport.\n\n\nReading layer `BN_pcds_to_school_dist' from data source \n  `E:\\BH_Schools_Consultation\\data\\BN_pcds_to_school_dist.gpkg' \n  using driver `GPKG'\nSimple feature collection with 104740 features and 6 fields (with 371 geometries empty)\nGeometry type: LINESTRING\nDimension:     XY\nBounding box:  xmin: 524231.1 ymin: 101905.6 xmax: 539243.1 ymax: 111008\nProjected CRS: OSGB36 / British National Grid",
     "crumbs": [
       "Maps",
       "Travel Maps"

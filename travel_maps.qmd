@@ -832,9 +832,11 @@ This means that the Council should be providing free bus travel to a lot of scho
 
 Everybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.
 
+If your child travels to school from outside of this blue area, then the council should be paying for their transport. 
+
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-library(sf)
-library(dplyr)
+bh_sec_sch1 <- bh_sec_sch %>% 
+  filter(id == "114581")
 
 # Read the GeoPackage
 BN_pcds_to_school_dist <- st_read("data/BN_pcds_to_school_dist.gpkg") %>% 
