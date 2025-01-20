@@ -130,6 +130,10 @@ Bus times were estimated from the Brighton and Hove Buses GTFS feed (all publish
 
 Note the the travel time for Longhill is earlier than all the other schools as it starts earlier due to its bus situation. Buses that run to the school at this time are captured in these travel times.
 
+If you want to download the data for these maps, the csv with all the data combined can be downloaded from here:
+
+<https://github.com/adamdennett/BH_Schools_Consultation/blob/master/bn_pcds_sch_travel.csv>
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
 ##longhill
 pcds_geo_longhill = inner_join(bn_pcds_r5r, pcds_2_longhill, by="id") %>% 
