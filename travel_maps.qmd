@@ -687,6 +687,8 @@ closest_schools <- closest_schools %>%
 bn_pcds_sch_travel <- bn_pcds_sch_travel %>%
   left_join(closest_schools, by = "id")
 
+bn_pcds_sch_travel1 <- bn_pcds_sch_travel
+
 
 bn_pcds_sch_travel = inner_join(bn_pcds_r5r, bn_pcds_sch_travel, by="id") %>% 
   st_as_sf(coords = c("lon", "lat")) %>% 
@@ -695,6 +697,7 @@ bn_pcds_sch_travel = inner_join(bn_pcds_r5r, bn_pcds_sch_travel, by="id") %>%
 #write_csv(bn_pcds_sch_travel, here("data", "bn_pcds_sch_travel.csv"))
 
 ```
+
 
 # Closest Schools by walk/bus travel time
 

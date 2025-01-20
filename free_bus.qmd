@@ -1,5 +1,5 @@
 ---
-title: "free_bus"
+title: "Free Bus Travel"
 author: "Adam Dennett"
 ---
 
@@ -38,15 +38,15 @@ memory.limit(size = 32000)  # Increase to 16 GB
 
 ```
 
-# Free Bus Travel
+# What the Government Says:
 
 The Government Publishes very clear rules on who is eligible for free travel to school.
 
-The latest revision of the guidelines was pubished in 2024 and can be read here.
+The latest revision of the guidelines was pubished in 2024 and can be read here:
 
 <https://assets.publishing.service.gov.uk/media/659d7ebb0dd0a200138b612a/Travel_to_school_for_children_of_compulsory_school_age.pdf>
 
-And refers to the legal guidelines on statutory walking distances prescribed by section 444(5) of the Education Act 1996 - <https://www.legislation.gov.uk/ukpga/1996/56/section/444>.
+This document refers to the legal guidelines on statutory walking distances prescribed by section 444(5) of the Education Act 1996 - <https://www.legislation.gov.uk/ukpga/1996/56/section/444>.
 
 The guidelines state:
 
@@ -55,13 +55,35 @@ The guidelines state:
 > 11. **A child aged 8 years or over is eligible for free travel to their nearest suitable school if it is more than 3 miles (4.83km) from their home.**
 > 12. When a local authority assesses whether the distance between a child’s home and their school is further than the statutory walking distance, **the route they measure must be the shortest route along which a child, accompanied as necessary, may walk in reasonable safety**. This is not necessarily the shortest distance by road. The route may also include footpaths, bridleways, other pathways and alternative entrances to the school (see paragraph 49 to 54 for guidance about accompaniment).
 
-This means that the Council should be providing free bus travel to a lot of school children already in Brighton. And under the new proposals, a lot more. We can look at the free areas (and then everywhere else) surrounding each school in the city.
+### Will BHCC have to pay for children randomly scattered to schools outside of their catchment area?
+
+The guidelines above were clearly written with the vast majority of other Local Education Authorities in the UK in mind - those that incorporate distance into their allocation methodologies.
+
+***What if the council don't allow a child to attend their nearest school?***
+
+Good question. Effectively, whatever school the council allocates a child to would be deemed their 'nearest'. Therefore if a child is allocated a school further than 3-miles from their home, then the council would have to pay for travel to that school.
+
+***What about children who 'choose' a school to attend which is not their nearest school and it is over 3 miles away?***
+
+The council would not be liable to pay for transport for these children.
+
+***How many children will the council have to pay transport costs for and how much will this cost them?***
+
+This is something the council should have estimated and included in the consultation materials as given the difficult financial situation the council are already in and asking the city to comment on in relation to cost savings - [https://www.brighton-hove.gov.uk/news/2024/council-invites-residents-choose-how-theyd-save-ps30-million](https://www.google.com/url?q=https://www.brighton-hove.gov.uk/news/2024/council-invites-residents-choose-how-theyd-save-ps30-million&sa=D&source=docs&ust=1737297115527348&usg=AOvVaw1nPMyKGJiF_YVj1Zp1GWOx) - it would feel like important information to be included in the consultation exercise. I am not sure why it hasn't been.
+
+This means that the Council should be providing free bus travel to a lot of school children already in Brighton. And under the new proposals, a lot more.
+
+***Would my child be eligible for free travel paid by the council if they attend school x,y or z?***
+
+We can have a look. The maps below show the shortest routes along the road network for each postcode in the city to each school in the city. While this is not a definitive answer (it's possible to measure point to point from each address, but I have not done this as it takes a lot of computing grunt), postcode to school is close enough.
+
+For each school:
+
+-   routes in blue are those that the council are not liable to pick the bill up for
+
+-   routes in red are those that the council would have to pick up the bill for
 
 ## Longhill - Free Travel Area
-
-Everybody living beyond the roads shaded blue (within 4.83km of the school along the road and pavement network) should be getting free transport.
-
-If your child travels to school from outside of this blue area, then the council should be paying for their transport.
 
 ```{r get-schools-info, warning=FALSE, message=FALSE, echo=FALSE}
 # Read the GeoPackage
@@ -196,4 +218,3 @@ map <- leaflet() %>%
 map
 
 ```
-
